@@ -1,3 +1,5 @@
+from simbolo import Simbolo
+
 '''
     Arbol de expresiones regulares generado a partir de una expresión regular en postfix.
         Cada nodo del árbol es una instancia de la clase Nodo.
@@ -65,3 +67,6 @@ class Nodo:
         self.valor = valor
         self.izq = izq
         self.der = der
+
+        ascii = ord(valor)
+        self.simbolo = Simbolo(ascii, valor)

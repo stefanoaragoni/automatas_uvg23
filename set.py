@@ -17,4 +17,5 @@ class Set:
         pass
     
     def AddItem(self, item):
-        self.Elementos.append(item)
+        if item not in self.Elementos:
+            self.Elementos.append(item)
