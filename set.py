@@ -1,20 +1,28 @@
-from abc import ABC, abstractmethod
-
 class Set:
     def __init__(self):
         self.Elementos = []
     
-    @abstractmethod
     def Interseccion(self, A):
-        pass
+        interseccion = Set()
+        for item in self.Elementos:
+            if item in A.Elementos:
+                interseccion.AddItem(item)
+        return interseccion
     
-    @abstractmethod
     def Union(self, A):
-        pass
+        union = Set()
+        for item in self.Elementos:
+            union.AddItem(item)
+        for item in A.Elementos:
+            union.AddItem(item)
+        return union
     
-    @abstractmethod
     def Diferencia(self, A):
-        pass
+        diferencia = Set()
+        for item in self.Elementos:
+            if item not in A.Elementos:
+                diferencia.AddItem(item)
+        return diferencia
     
     def AddItem(self, item):
         if item not in self.Elementos:
