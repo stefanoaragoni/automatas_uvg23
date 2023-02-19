@@ -1,30 +1,10 @@
 digraph {
-	"8f6b26f8-d7d0-4ee3-9327-123b149be60a" [label="."]
-	"1b9d6321-6ffc-4323-82fa-04af8d8e6a0c" [label="."]
-	"851f0c51-b48a-40ef-b1f7-677e505763c4" [label="."]
-	"17993d91-3ae6-4d5e-b48c-9dc9211be814" [label="*"]
-	"49147259-b57b-4262-94c3-93e75def3f38" [label="|"]
-	"0371e485-2f52-4ffe-bb83-4fd92f03b97e" [label=a]
-	"49147259-b57b-4262-94c3-93e75def3f38" -> "0371e485-2f52-4ffe-bb83-4fd92f03b97e"
-	"71570afb-b50e-401f-8a85-d3a61f37e32b" [label=b]
-	"49147259-b57b-4262-94c3-93e75def3f38" -> "71570afb-b50e-401f-8a85-d3a61f37e32b"
-	"17993d91-3ae6-4d5e-b48c-9dc9211be814" -> "49147259-b57b-4262-94c3-93e75def3f38"
-	"851f0c51-b48a-40ef-b1f7-677e505763c4" -> "17993d91-3ae6-4d5e-b48c-9dc9211be814"
-	"1ae817af-7e9b-4e78-b80f-c0c11c49a66d" [label=a]
-	"851f0c51-b48a-40ef-b1f7-677e505763c4" -> "1ae817af-7e9b-4e78-b80f-c0c11c49a66d"
-	"1b9d6321-6ffc-4323-82fa-04af8d8e6a0c" -> "851f0c51-b48a-40ef-b1f7-677e505763c4"
-	"f40728d9-84a6-4186-8483-9ed07b189023" [label="|"]
-	"0f08ccc8-8fa3-4286-ace4-7da0e12caad6" [label=a]
-	"f40728d9-84a6-4186-8483-9ed07b189023" -> "0f08ccc8-8fa3-4286-ace4-7da0e12caad6"
-	"6c273a8c-0933-4688-b6f4-e306f865e037" [label=b]
-	"f40728d9-84a6-4186-8483-9ed07b189023" -> "6c273a8c-0933-4688-b6f4-e306f865e037"
-	"1b9d6321-6ffc-4323-82fa-04af8d8e6a0c" -> "f40728d9-84a6-4186-8483-9ed07b189023"
-	"8f6b26f8-d7d0-4ee3-9327-123b149be60a" -> "1b9d6321-6ffc-4323-82fa-04af8d8e6a0c"
-	"7b2c4e9c-4a78-4299-8834-b03bb1f9cf06" [label="|"]
-	"9f42dcd3-0aa0-4b1a-806c-7afaf001bc6e" [label=a]
-	"7b2c4e9c-4a78-4299-8834-b03bb1f9cf06" -> "9f42dcd3-0aa0-4b1a-806c-7afaf001bc6e"
-	"2706ff05-16bf-4ae2-9b18-4ac1784e541f" [label=b]
-	"7b2c4e9c-4a78-4299-8834-b03bb1f9cf06" -> "2706ff05-16bf-4ae2-9b18-4ac1784e541f"
-	"8f6b26f8-d7d0-4ee3-9327-123b149be60a" -> "7b2c4e9c-4a78-4299-8834-b03bb1f9cf06"
-	label="ab|*a.ab|.ab|."
+	"e34d1f25-c29d-4b49-8ce2-faf49dba70d0" [label="*"]
+	"d3d0f702-1e3c-40a5-9ea6-de396d141364" [label="|"]
+	"9981b6a9-bd61-4f9c-aded-92a5174a1bea" [label=a]
+	"d3d0f702-1e3c-40a5-9ea6-de396d141364" -> "9981b6a9-bd61-4f9c-aded-92a5174a1bea"
+	"44ed17be-6b49-4f4f-808c-8c3b0646b0e9" [label=b]
+	"d3d0f702-1e3c-40a5-9ea6-de396d141364" -> "44ed17be-6b49-4f4f-808c-8c3b0646b0e9"
+	"e34d1f25-c29d-4b49-8ce2-faf49dba70d0" -> "d3d0f702-1e3c-40a5-9ea6-de396d141364"
+	label="ab|*"
 }

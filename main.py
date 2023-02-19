@@ -10,7 +10,7 @@ from graph import Graph
 from simulacion import Simulacion
 
 def main():
-    expresion = ["ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*a", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
+    expresion = ["(a|(b|c)?","a|","a|b)*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*a", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
     prueba = ['ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
     opcion = 0
 
@@ -30,7 +30,7 @@ def main():
             tree.print_tree(postfix_expr.postfix)
 
             afn = AFN(tree.root)
-            Graph(afn, expresion[opcion-1])
+            Graph(afn, postfix_expr.regex)
 
             for test in prueba:
                 print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
