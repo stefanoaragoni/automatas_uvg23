@@ -97,8 +97,7 @@ class AFN(Automata):
         b = Estado(self.count_estados)
         self.count_estados += 1
 
-        ascii = ord(simbolo.valor)
-        simbolo = Simbolo(ascii, simbolo.valor)
+        simbolo = simbolo.simbolo
 
         return a, b, simbolo
 
