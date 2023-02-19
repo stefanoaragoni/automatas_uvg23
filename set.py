@@ -27,3 +27,12 @@ class Set:
     def AddItem(self, item):
         if item not in self.Elementos:
             self.Elementos.append(item)
+
+    def IsEmpty(self):
+        return len(self.Elementos) == 0
+
+    def returnLastItem(self):
+        return self.Elementos[-1]
+
+    def deleteItem(self, item):
+        self.Elementos.remove(item)

@@ -1,6 +1,5 @@
 from set import Set
 
 class Estado:
-    def __init__(self, id, tipo):
+    def __init__(self, id):
         self.id = id
-        self.tipo = tipo

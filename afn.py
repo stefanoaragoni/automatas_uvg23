@@ -2,6 +2,8 @@ from automata import Automata
 from set import Set
 from estado import Estado
 from simbolo import Simbolo
+from arbol import Nodo
+from transicion import Transicion
 
 '''
     Clase que representa un AFN. Inicializa el automata con los estados, simbolos y transiciones.
@@ -12,6 +14,9 @@ class AFN(Automata):
         # Inicializa la clase padre (Automata)
         super().__init__()
 
+        # Contador de estados
+        self.count_estados = 0
+
         # Inicializa el arbol de expresiones regulares
         self.tree = tree
 
@@ -19,7 +24,11 @@ class AFN(Automata):
         self.Simbolos = self.get_simbolos(tree)
 
         # Creacion del automata
-        self.afn_construction(tree)
+        self.afn_construction(self.tree)
+        self.estados_calc()
+        self.simplify()
+
+        print("DONE")
 
     # Obtiene los simbolos del arbol de expresiones regulares
     def get_simbolos(self, tree_node):
@@ -42,18 +51,246 @@ class AFN(Automata):
                 
         return simbolos_unicos
 
-    def afn_construction(self, nodo):
-        valor, der, izq, simbolo = nodo.valor, nodo.der, nodo.izq, nodo.simbolo
+    def estados_calc(self):
+        # Determinar estado final
+        for estado in self.Estados.Elementos:
 
-        if (izq == None and der == None):
-            return True
+            check = True
+            for transicion in self.transiciones:
 
-        self.afn_construction(izq)
+                if transicion.estado_origen.id == estado.id:
+                    check = False
+                
+            if check == True:
+                self.EstadosFinales.AddItem(estado)
 
-        
+        # Determinar estado inicial
+        for estado in self.Estados.Elementos:
 
-        
+            check = True
+            for transicion in self.transiciones:
+
+                if transicion.estado_destino.id == estado.id:
+                    check = False
+
+            if check == True:
+                self.estado_inicial = estado
+
+    def simplify(self):
+        pass
+
+    def afn_construction(self, padre):
+        hijoIzq = padre.izq
+        hijoDer = padre.der
+
+        if padre.valor == '.':
+            return self.afn_concatenacion(hijoIzq, hijoDer)
+
+        elif padre.valor == '|':
+            return self.afn_or(hijoIzq, hijoDer)
+
+        elif padre.valor == '*':
+            self.afn_cerradura(padre)
+
+        else:
+            self.afn_simbolo(padre)
+
+    def afn_simbolo(self, simbolo):
+        a = Estado(self.count_estados)
+        self.count_estados += 1
+
+        b = Estado(self.count_estados)
+        self.count_estados += 1
+
+        ascii = ord(simbolo.valor)
+        simbolo = Simbolo(ascii, simbolo.valor)
+
+        return a, b, simbolo
+
+    def afn_concatenacion(self, hojaIzq, hojaDer):
+        hijoIzqHojaIzq = hojaIzq.izq
+        hijoIzqHojaDer = hojaDer.izq
+
+        if hijoIzqHojaIzq is None and hijoIzqHojaDer is None:
+            a1, b1, s1 = self.afn_simbolo(hojaIzq)
+            a2, b2, s2 = self.afn_simbolo(hojaDer)
+
+            self.transiciones.append(Transicion(a1, b1, s1))
+            self.transiciones.append(Transicion(b1, a2, s2))
+
+            self.Estados.AddItem(a1)
+            self.Estados.AddItem(b1)
+            self.Estados.AddItem(a2)
+
+            self.count_estados -= 1
+
+            return a1, a2, "."
+
+        if hijoIzqHojaIzq is not None and hijoIzqHojaDer is None:
             
+            a1, b1, s1 = self.afn_construction(hojaIzq)
+            a2, b2, s2 = self.afn_simbolo(hojaDer)
 
+            # check if s1 is a string
+            if isinstance(s1, str):
+                self.transiciones.append(Transicion(b1, a2, s2))
+                self.Estados.AddItem(b1)
+                self.Estados.AddItem(a2)
+                self.count_estados -= 1
+                return a1, a2, "."
 
+            elif isinstance(s2, str):
+                self.transiciones.append(Transicion(b1, a2, s1))
+                self.Estados.AddItem(b1)
+                self.Estados.AddItem(a2)
+                self.count_estados -= 1
+                return a1, a2, "."
+
+        if hijoIzqHojaIzq is None and hijoIzqHojaDer is not None:
             
+            a1, b1, s1 = self.afn_simbolo(hojaIzq)
+            a2, b2, s2 = self.afn_construction(hojaDer)
+
+            # check if s1 is a string
+            if isinstance(s1, str):
+                self.transiciones.append(Transicion(b1, a2, s2))
+                self.Estados.AddItem(b1)
+                self.Estados.AddItem(a2)
+                self.count_estados -= 1
+                return a1, a2, "."
+
+            elif isinstance(s2, str):
+                self.transiciones.append(Transicion(b1, a2, s1))
+                self.Estados.AddItem(b1)
+                self.Estados.AddItem(a2)
+                self.count_estados -= 1
+                return a1, a2, "."
+
+        if hijoIzqHojaIzq is not None and hijoIzqHojaDer is not None:
+            
+            a1, b1, s1 = self.afn_construction(hojaIzq)
+            a2, b2, s2 = self.afn_construction(hojaDer)
+
+            # check if s1 is a string
+            if isinstance(s1, str):
+                self.transiciones.append(Transicion(b1, a2, s2))
+                self.Estados.AddItem(b1)
+                self.Estados.AddItem(a2)
+                self.count_estados -= 1
+                return a1, a2, "."
+
+            elif isinstance(s2, str):
+                self.transiciones.append(Transicion(b1, a2, s1))
+                self.Estados.AddItem(b1)
+                self.Estados.AddItem(a2)
+                self.count_estados -= 1
+                return a1, a2, "."
+
+    def afn_or(self, hojaIzq, hojaDer):
+        hijoIzqHojaIzq = hojaIzq.izq
+        hijoIzqHojaDer = hojaDer.izq
+
+        t0 = Estado(self.count_estados)
+        self.count_estados += 1
+        self.Estados.AddItem(t0)
+
+        ascii = ord('ε')
+        simbolo = Simbolo(ascii, 'ε')
+
+        if hijoIzqHojaIzq is None and hijoIzqHojaDer is None:
+            a1, b1, s1 = self.afn_simbolo(hojaIzq)
+            a2, b2, s2 = self.afn_simbolo(hojaDer)
+
+            t1 = Estado(self.count_estados)
+            self.count_estados += 1
+            self.Estados.AddItem(t1)
+
+            self.transiciones.append(Transicion(t0, a1, simbolo))
+            self.transiciones.append(Transicion(t0, a2, simbolo))
+
+            self.transiciones.append(Transicion(a1, b1, s1))
+            self.transiciones.append(Transicion(a2, b2, s2))
+
+            self.transiciones.append(Transicion(b1, t1, simbolo))
+            self.transiciones.append(Transicion(b2, t1, simbolo))
+
+            self.Estados.AddItem(a1)
+            self.Estados.AddItem(a2)
+            self.Estados.AddItem(b1)
+            self.Estados.AddItem(b2)
+
+            return t0, t1, "|"
+
+        if hijoIzqHojaIzq is not None and hijoIzqHojaDer is None:
+            
+            a1, b1, s1 = self.afn_construction(hojaIzq)
+            a2, b2, s2 = self.afn_simbolo(hojaDer)
+
+            t1 = Estado(self.count_estados)
+            self.count_estados += 1
+            self.Estados.AddItem(t1)
+
+            self.transiciones.append(Transicion(t0, a1, simbolo))
+            self.transiciones.append(Transicion(t0, a2, simbolo))
+
+            self.transiciones.append(Transicion(a2, b2, s2))
+
+            self.transiciones.append(Transicion(b1, t1, simbolo))
+            self.transiciones.append(Transicion(b2, t1, simbolo))
+
+            self.Estados.AddItem(a1)
+            self.Estados.AddItem(a2)
+            self.Estados.AddItem(b1)
+            self.Estados.AddItem(b2)
+
+            return t0, t1, "|"
+
+        if hijoIzqHojaIzq is None and hijoIzqHojaDer is not None:
+            
+            a1, b1, s1 = self.afn_simbolo(hojaIzq)
+            a2, b2, s2 = self.afn_construction(hojaDer)
+
+            t1 = Estado(self.count_estados)
+            self.count_estados += 1
+            self.Estados.AddItem(t1)
+
+            self.transiciones.append(Transicion(t0, a1, simbolo))
+            self.transiciones.append(Transicion(t0, a2, simbolo))
+
+            self.transiciones.append(Transicion(a1, b1, s1))
+
+            self.transiciones.append(Transicion(b1, t1, simbolo))
+            self.transiciones.append(Transicion(b2, t1, simbolo))
+
+            self.Estados.AddItem(a1)
+            self.Estados.AddItem(a2)
+            self.Estados.AddItem(b1)
+            self.Estados.AddItem(b2)
+
+            return t0, t1, "|"
+
+        if hijoIzqHojaIzq is not None and hijoIzqHojaDer is not None:
+            
+            a1, b1, s1 = self.afn_construction(hojaIzq)
+            a2, b2, s2 = self.afn_construction(hojaDer)
+
+            t1 = Estado(self.count_estados)
+            self.count_estados += 1
+            self.Estados.AddItem(t1)
+
+            self.transiciones.append(Transicion(t0, a1, simbolo))
+            self.transiciones.append(Transicion(t0, a2, simbolo))
+
+            self.transiciones.append(Transicion(b1, t1, simbolo))
+            self.transiciones.append(Transicion(b2, t1, simbolo))
+
+            self.Estados.AddItem(a1)
+            self.Estados.AddItem(a2)
+            self.Estados.AddItem(b1)
+            self.Estados.AddItem(b2)
+
+            return t0, t1, "|"
+
+
+    def afn_cerradura(self, tree):
+        pass
