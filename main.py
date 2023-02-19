@@ -7,9 +7,11 @@ from afn import AFN
 from postfix import Postfix
 from arbol import Arbol
 from graph import Graph
+from simulacion import Simulacion
 
 def main():
-    expresion = ["ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
+    expresion = ["ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*a", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
+    prueba = ['ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
     opcion = 0
 
     while True:
@@ -25,14 +27,20 @@ def main():
             print("\nExpresión Regular (postfix):",postfix_expr.postfix)
 
             tree = Arbol(postfix_expr.postfix)
-            #tree.print_tree(postfix_expr.postfix)
+            tree.print_tree(postfix_expr.postfix)
 
             afn = AFN(tree.root)
             Graph(afn, expresion[opcion-1])
 
+            for test in prueba:
+                print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
+
             opcion = 0
+
+            input("\nPresione ENTER para continuar...")
         else:
-            print("\nOpción inválida, intente de nuevo.")
+            print("\nOpción inválida, adiós!")
+            break
 
 if __name__ == "__main__":
     main()
