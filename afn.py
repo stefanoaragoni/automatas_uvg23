@@ -124,67 +124,43 @@ class AFN(Automata):
 
             self.count_estados -= 1
 
-            return a1, a2, "."
+            return a1, a2, s2
 
         if hijoIzqHojaIzq is not None and hijoIzqHojaDer is None:
             
             a1, b1, s1 = self.afn_construction(hojaIzq)
             a2, b2, s2 = self.afn_simbolo(hojaDer)
 
-            # check if s1 is a string
-            if isinstance(s1, str):
-                self.transiciones.append(Transicion(b1, a2, s2))
-                self.Estados.AddItem(b1)
-                self.Estados.AddItem(a2)
-                self.count_estados -= 1
-                return a1, a2, "."
-
-            elif isinstance(s2, str):
-                self.transiciones.append(Transicion(b1, a2, s1))
-                self.Estados.AddItem(b1)
-                self.Estados.AddItem(a2)
-                self.count_estados -= 1
-                return a1, a2, "."
+            self.transiciones.append(Transicion(b1, a2, s2))
+            self.Estados.AddItem(b1)
+            self.Estados.AddItem(a2)
+            self.count_estados -= 1
+            return b1, a2, s2
 
         if hijoIzqHojaIzq is None and hijoIzqHojaDer is not None:
             
             a1, b1, s1 = self.afn_simbolo(hojaIzq)
             a2, b2, s2 = self.afn_construction(hojaDer)
 
-            # check if s1 is a string
-            if isinstance(s1, str):
-                self.transiciones.append(Transicion(b1, a2, s2))
-                self.Estados.AddItem(b1)
-                self.Estados.AddItem(a2)
-                self.count_estados -= 1
-                return a1, a2, "."
-
-            elif isinstance(s2, str):
-                self.transiciones.append(Transicion(b1, a2, s1))
-                self.Estados.AddItem(b1)
-                self.Estados.AddItem(a2)
-                self.count_estados -= 1
-                return a1, a2, "."
+            self.transiciones.append(Transicion(b1, a2, s1))
+            self.Estados.AddItem(b1)
+            self.Estados.AddItem(a2)
+            self.count_estados -= 1
+            return b1, a2, s2
 
         if hijoIzqHojaIzq is not None and hijoIzqHojaDer is not None:
             
             a1, b1, s1 = self.afn_construction(hojaIzq)
             a2, b2, s2 = self.afn_construction(hojaDer)
 
-            # check if s1 is a string
-            if isinstance(s1, str):
-                self.transiciones.append(Transicion(b1, a2, s2))
-                self.Estados.AddItem(b1)
-                self.Estados.AddItem(a2)
-                self.count_estados -= 1
-                return a1, a2, "."
-
-            elif isinstance(s2, str):
-                self.transiciones.append(Transicion(b1, a2, s1))
-                self.Estados.AddItem(b1)
-                self.Estados.AddItem(a2)
-                self.count_estados -= 1
-                return a1, a2, "."
+            # find transicion that goes to b1 using s1
+            trans_temp = None
+            for transicion in self.transiciones:
+                if transicion.estado_destino == b1 and transicion.el_simbolo == s1:
+                    transicion.estado_destino = a2
+                    self.Estados.deleteItem(b1)
+                    
+            return a2, b2, s2
 
     def afn_or(self, hojaIzq, hojaDer):
         hijoIzqHojaIzq = hojaIzq.izq
@@ -219,7 +195,7 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(b2)
 
-            return t0, t1, "|"
+            return t0, t1, s2
 
         if hijoIzqHojaIzq is not None and hijoIzqHojaDer is None:
             
@@ -243,7 +219,7 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(b2)
 
-            return t0, t1, "|"
+            return t0, t1, s2
 
         if hijoIzqHojaIzq is None and hijoIzqHojaDer is not None:
             
@@ -267,7 +243,7 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(b2)
 
-            return t0, t1, "|"
+            return t0, t1, s2
 
         if hijoIzqHojaIzq is not None and hijoIzqHojaDer is not None:
             
@@ -289,7 +265,7 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(b2)
 
-            return t0, t1, "|"
+            return t0, t1, s2
 
 
     def afn_cerradura(self, tree):

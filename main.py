@@ -9,7 +9,7 @@ from arbol import Arbol
 from graph import Graph
 
 def main():
-    expresion = "(a|b)|(cb)"
+    expresion = "(a|b)cbe((a|b)|z)qwerty"
     postfix_expr = Postfix(expresion)
 
     print("\nExpresión Regular (infix):",postfix_expr.regex)
