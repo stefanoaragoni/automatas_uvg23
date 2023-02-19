@@ -26,8 +26,6 @@ class AFN(Automata):
         # Creacion del automata
         self.afn_construction(self.tree)
         self.estados_calc()
-        self.simplify()
-
         print("DONE")
 
     # Obtiene los simbolos del arbol de expresiones regulares
@@ -76,9 +74,6 @@ class AFN(Automata):
             if check == True:
                 self.estado_inicial = estado
 
-    def simplify(self):
-        pass
-
     def afn_construction(self, padre):
         hijoIzq = padre.izq
         hijoDer = padre.der
@@ -90,7 +85,7 @@ class AFN(Automata):
             return self.afn_or(hijoIzq, hijoDer)
 
         elif padre.valor == '*':
-            self.afn_cerradura(padre)
+            return self.afn_cerradura(hijoIzq)
 
         else:
             self.afn_simbolo(padre)
@@ -145,8 +140,7 @@ class AFN(Automata):
             self.transiciones.append(Transicion(b1, a2, s1))
             self.Estados.AddItem(b1)
             self.Estados.AddItem(a2)
-            self.count_estados -= 1
-            return b1, a2, s2
+            return b1, b2, s2
 
         if hijoIzqHojaIzq is not None and hijoIzqHojaDer is not None:
             
@@ -156,7 +150,7 @@ class AFN(Automata):
             # find transicion that goes to b1 using s1
             trans_temp = None
             for transicion in self.transiciones:
-                if transicion.estado_destino == b1 and transicion.el_simbolo == s1:
+                if transicion.estado_destino == b1 and transicion.el_simbolo.id == s1.id:
                     transicion.estado_destino = a2
                     self.Estados.deleteItem(b1)
                     
@@ -195,7 +189,7 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(b2)
 
-            return t0, t1, s2
+            return t0, t1, simbolo
 
         if hijoIzqHojaIzq is not None and hijoIzqHojaDer is None:
             
@@ -219,7 +213,7 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(b2)
 
-            return t0, t1, s2
+            return t0, t1, simbolo
 
         if hijoIzqHojaIzq is None and hijoIzqHojaDer is not None:
             
@@ -243,7 +237,7 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(b2)
 
-            return t0, t1, s2
+            return t0, t1, simbolo
 
         if hijoIzqHojaIzq is not None and hijoIzqHojaDer is not None:
             
@@ -265,8 +259,54 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(b2)
 
-            return t0, t1, s2
+            return t0, t1, simbolo
 
+    def afn_cerradura(self, hojaIzq):
+        hijoIzqHojaIzq = hojaIzq.izq
 
-    def afn_cerradura(self, tree):
-        pass
+        t0 = Estado(self.count_estados)
+        self.count_estados += 1
+        self.Estados.AddItem(t0)
+
+        ascii = ord('ε')
+        simbolo = Simbolo(ascii, 'ε')
+
+        if hijoIzqHojaIzq is None:
+            
+            a1, b1, s1 = self.afn_simbolo(hojaIzq)
+
+            t1 = Estado(self.count_estados)
+            self.count_estados += 1
+            self.Estados.AddItem(t1)
+
+            self.transiciones.append(Transicion(t0, t1, simbolo))
+            self.transiciones.append(Transicion(t0, a1, simbolo))
+
+            self.transiciones.append(Transicion(a1, b1, s1))
+            self.transiciones.append(Transicion(b1, a1, simbolo))
+
+            self.transiciones.append(Transicion(b1, t1, simbolo))
+
+            self.Estados.AddItem(a1)
+            self.Estados.AddItem(b1)
+
+            return t0, t1, simbolo
+
+        if hijoIzqHojaIzq is not None:
+            
+            a1, b1, s1 = self.afn_construction(hojaIzq)
+
+            t1 = Estado(self.count_estados)
+            self.count_estados += 1
+            self.Estados.AddItem(t1)
+
+            self.transiciones.append(Transicion(t0, t1, simbolo))
+            self.transiciones.append(Transicion(t0, a1, simbolo))
+
+            self.transiciones.append(Transicion(b1, a1, simbolo))
+            self.transiciones.append(Transicion(b1, t1, simbolo))
+
+            self.Estados.AddItem(a1)
+            self.Estados.AddItem(b1)
+
+            return t0, t1, simbolo

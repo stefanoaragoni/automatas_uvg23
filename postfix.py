@@ -36,8 +36,9 @@ class Postfix:
         for i, char in enumerate(self.regex):
             new_regex += char
             if i+1 < len(self.regex):
-                if (char not in ['(', '|'] and self.regex[i+1] not in [')', '|', '*', '+', '?']) or (char == ')' and self.regex[i+1] not in ['|', '*', '+', '?']) or (char == '*' and self.regex[i+1] not in ['|', '*', '+', '?']) or (char == '+' and self.regex[i+1] not in ['|', '*', '+', '?']) or (char == '?' and self.regex[i+1] not in ['|', '*', '+', '?']):
-                    new_regex += '.'
+                if (char not in ['(', '|'] and self.regex[i+1] not in [')', '|', '*', '+', '?']) or (char == ')' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '*' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '+' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '?' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '?' and self.regex[i+1] not in [')'] and self.regex[i+2] not in ['|', '*', '+', '?', ')']):
+                    if self.regex[i+1] != ')' or char != '(':
+                        new_regex += '.'
         return new_regex
 
     # Verifica que la expresión regular infix sea válida; si no lo es, lanza una excepción

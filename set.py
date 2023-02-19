@@ -35,4 +35,5 @@ class Set:
         return self.Elementos[-1]
 
     def deleteItem(self, item):
-        self.Elementos.remove(item)
+        if item in self.Elementos:
+            self.Elementos.remove(item)
