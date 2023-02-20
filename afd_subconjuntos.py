@@ -119,22 +119,21 @@ class AFD_Subconjuntos(Automata):
                     for subconjunto in self.subconjuntos:
                         elementos_subconjunto = (self.subconjuntos[subconjunto])
                         
-                        verificador_subconjunto = 0
+                        verificador_subconjunto = elementos_subconjunto.size()
                         # Verificar si todos los elementos del estado actual son iguales a los elementos del subconjunto
                         for estado in estados.Elementos:
                             if estado in elementos_subconjunto.Elementos:
-                                verificador_subconjunto += 1
+                                verificador_subconjunto -= 1
                                 
                         verificador.append(verificador_subconjunto)
                         
-                    if estados.size() not in verificador:
+                    if 0 not in verificador:
                         self.subconjuntos[self.contador_estados] = estados
                         self.subconjuntos_transiciones.append([estado_actual_id, self.contador_estados, simbolo])
                         queue.AddItem([estados, self.contador_estados])
                         self.contador_estados += 1
-                    
                     else:
-                        index = verificador.index(estados.size())
+                        index = verificador.index(0)
                         self.subconjuntos_transiciones.append([estado_actual_id, index, simbolo])
 
         # Agrega los estados finales
