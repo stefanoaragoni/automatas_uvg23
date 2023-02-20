@@ -2,12 +2,12 @@ from graphviz import Digraph
 from automata import Automata
 from afn import AFN
 
-def Graph(automata, regex):
+def Graph(automata, regex, type):
     dot = Digraph()
 
     # Set graph attributes
     dot.attr(rankdir="LR")
-    tempStr = str("\AFN: Thompson ["+regex+"]")
+    tempStr = str("\ "+type+" ["+regex+"] ")
     dot.attr(label=tempStr)
     dot.attr(fontsize='20')
     

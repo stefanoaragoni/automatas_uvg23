@@ -28,6 +28,11 @@ class Set:
         if item not in self.Elementos:
             self.Elementos.append(item)
 
+    def AddItems(self, items):
+        for item in items:
+            if item not in self.Elementos:
+                self.AddItem(item)
+
     def IsEmpty(self):
         return len(self.Elementos) == 0
 
