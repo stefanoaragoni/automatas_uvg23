@@ -1,10 +1,26 @@
 digraph {
 	rankdir=LR
-	label="\ AFD_Subconjuntos [a.b*.a.b*] "
+	label="\ AFD_Subconjuntos [(a|ε).b.(a+).c?] "
 	fontsize=20
 	node [shape=circle]
 	"" [height=0 shape=none width=0]
 	0 [shape=circle]
 	"" -> 0
+	3 [peripheries=2 shape=circle]
+	4 [peripheries=2 shape=circle]
+	5 [peripheries=2 shape=circle]
 	0 [shape=circle]
+	1 [shape=circle]
+	2 [shape=circle]
+	3 [shape=circle]
+	4 [shape=circle]
+	5 [shape=circle]
+	0 -> 1 [label=a]
+	0 -> 2 [label=b]
+	1 -> 2 [label=b]
+	2 -> 3 [label=a]
+	3 -> 4 [label=a]
+	3 -> 5 [label=c]
+	4 -> 4 [label=a]
+	4 -> 5 [label=c]
 }

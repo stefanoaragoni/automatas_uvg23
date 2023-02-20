@@ -20,7 +20,7 @@ def main():
         for i in range(len(expresion)):
             print(f"\t{i+1}. {expresion[i]}")
 
-        opcion = 5 #int(input("\nIngrese el número de la expresión regular a evaluar: "))
+        opcion = 9 #int(input("\nIngrese el número de la expresión regular a evaluar: "))
 
         if opcion > 0 and opcion <= len(expresion):
             postfix_expr = Postfix(expresion[opcion-1])

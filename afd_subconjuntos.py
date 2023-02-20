@@ -57,37 +57,25 @@ class AFD_Subconjuntos(Automata):
 
         return estados
 
-    def e_closure_check(self, estado, simbolo_transicion, visited = Set()):
-        estados = Set()
-        visited.AddItem(estado)
-        check = False
+    def e_closure_check(self, estado, simbolo_transicion):
+        visited = Set()
+        stack = [estado]
+        result = Set()
 
-        if estado not in self.afn.EstadosFinales.Elementos:
+        while stack:
+            estado = stack.pop()
+            if estado in visited.Elementos:
+                continue
+            visited.AddItem(estado)
+            result.AddItem(estado)
+
             for transicion in self.afn.transiciones:
-                if (transicion.estado_origen == estado and transicion.el_simbolo.id == self.ascii):
-                    nuevo_estado = transicion.estado_destino
+                if transicion.estado_origen == estado:
+                    if (transicion.el_simbolo.id == self.ascii and transicion.estado_destino != estado and transicion.estado_destino not in visited.Elementos):
+                        stack.append(transicion.estado_destino)
 
-                    if nuevo_estado not in visited.Elementos:
-                        visited.AddItem(nuevo_estado)
-                        if (check):
-                            result = self.e_closure_check(nuevo_estado, simbolo_transicion, visited)
-                            if result:
-                                estados = estados.Union(result)
+        return result
 
-                if(transicion.estado_origen == estado and transicion.el_simbolo.id == simbolo_transicion):
-                    nuevo_estado = transicion.estado_destino
-
-                    if nuevo_estado not in visited.Elementos:
-                        visited.AddItem(nuevo_estado)
-                        result = self.e_closure_check(nuevo_estado, simbolo_transicion, visited)
-                        if result:
-                            estados = estados.Union(result)
-                            check = True
-
-        if check:
-            return estados
-        else:
-            return False
 
     # https://www.cs.scranton.edu/~mccloske/courses/cmps260/nfa_to_dfa.html
     def afd_construccion(self):
@@ -118,25 +106,36 @@ class AFD_Subconjuntos(Automata):
                 # Inicializa el conjunto de estados
                 estados = Set()
 
-                # Para cada estado en el conjunto actual
-                for estado in estado_actual.Elementos:
-                    # Obtiene el conjunto de estados alcanzables por el símbolo actual desde el estado actual
-                    temporal_result = self.e_closure_check(estado, simbolo_transicion)
-                    
-                    if temporal_result != False:
-                        # Agrega los estados alcanzables al conjunto de estados
+                # Buscamos elemento con transicion con simbolo
+                for transicion in self.afn.transiciones:
+                    if (transicion.el_simbolo.id == simbolo_transicion) and (transicion.estado_origen in estado_actual.Elementos):
+
+                        temporal_result = self.e_closure_check(transicion.estado_destino, simbolo_transicion)
                         estados = estados.Union(temporal_result)
 
-                # Si el conjunto de estados no está vacío
-                if estados.Elementos:
 
-                    for i in range(0, len(self.subconjuntos)):
-                        if (estados.Diferencia(self.subconjuntos[i])).Elementos != [] and (self.subconjuntos[i].Diferencia(estados)).Elementos != []:
-                            self.subconjuntos[self.contador_estados] = estados
-                            self.subconjuntos_transiciones.append([estado_actual_id, self.contador_estados, simbolo])
-                            queue.AddItem([estados, self.contador_estados])
-                            self.contador_estados += 1
-                            break
+                if estados.size() != 0:
+                    verificador = []
+                    for subconjunto in self.subconjuntos:
+                        elementos_subconjunto = (self.subconjuntos[subconjunto])
+                        
+                        verificador_subconjunto = 0
+                        # Verificar si todos los elementos del estado actual son iguales a los elementos del subconjunto
+                        for estado in estados.Elementos:
+                            if estado in elementos_subconjunto.Elementos:
+                                verificador_subconjunto += 1
+                                
+                        verificador.append(verificador_subconjunto)
+                        
+                    if estados.size() not in verificador:
+                        self.subconjuntos[self.contador_estados] = estados
+                        self.subconjuntos_transiciones.append([estado_actual_id, self.contador_estados, simbolo])
+                        queue.AddItem([estados, self.contador_estados])
+                        self.contador_estados += 1
+                    
+                    else:
+                        index = verificador.index(estados.size())
+                        self.subconjuntos_transiciones.append([estado_actual_id, index, simbolo])
 
         # Agrega los estados finales
         for i in range(0, len(self.subconjuntos)):

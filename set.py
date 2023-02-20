@@ -42,3 +42,6 @@ class Set:
     def deleteItem(self, item):
         if item in self.Elementos:
             self.Elementos.remove(item)
+
+    def size(self):
+        return len(self.Elementos)
