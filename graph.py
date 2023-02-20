@@ -30,4 +30,4 @@ def Graph(automata, regex, type):
         dot.edge(str(transicion.estado_origen.id), str(transicion.estado_destino.id), label=transicion.el_simbolo.c_id)
 
     # Render graph
-    dot.render("automata", view=True)
+    dot.render(type, view=True)

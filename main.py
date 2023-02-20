@@ -20,7 +20,7 @@ def main():
         for i in range(len(expresion)):
             print(f"\t{i+1}. {expresion[i]}")
 
-        opcion = 9 #int(input("\nIngrese el número de la expresión regular a evaluar: "))
+        opcion = 5 #int(input("\nIngrese el número de la expresión regular a evaluar: "))
 
         if opcion > 0 and opcion <= len(expresion):
             postfix_expr = Postfix(expresion[opcion-1])
@@ -31,13 +31,13 @@ def main():
             tree.print_tree(postfix_expr.postfix)
 
             afn = AFN(tree.root)
-            Graph(afn, postfix_expr.regex, "AFN: Thompson")
+            Graph(afn, postfix_expr.regex, "AFN")
 
             for test in prueba:
                 print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
 
             afd_subconjuntos = AFD_Subconjuntos(afn)
-            #Graph(afd_subconjuntos, postfix_expr.regex, "AFD: Subconjuntos")
+            Graph(afd_subconjuntos, postfix_expr.regex, "AFD_Subconjuntos")
 
             opcion = 0
 
