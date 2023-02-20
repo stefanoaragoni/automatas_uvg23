@@ -121,9 +121,11 @@ class AFD_Subconjuntos(Automata):
                         
                         verificador_subconjunto = elementos_subconjunto.size()
                         # Verificar si todos los elementos del estado actual son iguales a los elementos del subconjunto
-                        for estado in estados.Elementos:
-                            if estado in elementos_subconjunto.Elementos:
-                                verificador_subconjunto -= 1
+                        
+                        if estados.size() == elementos_subconjunto.size():
+                            for estado in estados.Elementos:
+                                if estado in elementos_subconjunto.Elementos:
+                                    verificador_subconjunto -= 1
                                 
                         verificador.append(verificador_subconjunto)
                         
