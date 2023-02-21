@@ -7,9 +7,13 @@ class Simulacion:
         self.resultado = False
         
         estado_inicial = automata.estado_inicial
+        self.visited = set()
         self.simular(estado_inicial, cadena)
 
     def simular(self, estado, cadena):
+        if (estado, cadena) in self.visited:
+            return
+        self.visited.add((estado, cadena))
         
         primer_simbolo = cadena[0] if cadena else ''
 
@@ -24,6 +28,5 @@ class Simulacion:
             if estado in self.automata.EstadosFinales.Elementos:
                 self.resultado = True
                 return
-
 
 
