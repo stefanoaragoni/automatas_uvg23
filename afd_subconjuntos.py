@@ -38,8 +38,6 @@ class AFD_Subconjuntos(Automata):
 
         self.afd_construccion()
 
-        print("hey")
-
     def e_closure(self, estado, simbolo_transicion):
         estados = Set()
         estados.AddItem(estado)
