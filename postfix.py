@@ -30,13 +30,27 @@ class Postfix:
             self.regex = '(' * (num_close - num_open) + self.regex
             print("\nDeteccion Error: Se agregaron paréntesis de apertura para balancear la expresión regular.")
 
+        stack = []
+        for i, c in enumerate(self.regex):
+            if c == '(':
+                stack.append(i)
+            elif c == ')':
+                if len(stack) == 0:
+                    raise Exception(f"\nDeteccion Error: Se encontro un parentesis de cierre sin su correspondiente apertura en la posición {i}.")
+                stack.pop()
+
+        if len(stack) > 0:
+            for i in stack[::-1]:
+                raise Exception(f"\nDeteccion Error: Se encontro un parentesis de apertura sin su correspondiente cierre en la posición {i}.")
+
+
     # Agrega un punto de concatenación entre caracteres
     def add_concatenation(self):
         new_regex = ''
         for i, char in enumerate(self.regex):
             new_regex += char
             if i+1 < len(self.regex):
-                if (char not in ['(', '|'] and self.regex[i+1] not in [')', '|', '*', '+', '?']) or (char == ')' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '*' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '+' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '?' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '?' and self.regex[i+1] not in [')'] and self.regex[i+2] not in ['|', '*', '+', '?', ')']):
+                if (char not in ['(', '|'] and self.regex[i+1] not in [')', '|', '*', '+', '?']) or (char == ')' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '*' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '+' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '?' and self.regex[i+1] not in ['|', '*', '+', '?', ')']):
                     if self.regex[i+1] != ')' or char != '(':
                         new_regex += '.'
         return new_regex
@@ -48,10 +62,27 @@ class Postfix:
         if self.regex[0] in self.operators:
             raise Exception('La expresión regular infix no puede iniciar con un operador.')
 
+        simbolos_binarios = ['|', '.']
+        simbolos_unarios = ['*', '+', '?']
         for i, char in enumerate(self.regex):
             if i+1 < len(self.regex):
                 if char == ')' and self.regex[i+1] == '(':
                     raise Exception('La expresión regular infix no puede tener dos expresiones seguidas sin operador.')
+                
+                if char in simbolos_binarios and self.regex[i+1] in simbolos_binarios:
+                    raise Exception('La expresión regular infix no puede tener dos operadores seguidos como ".", "|".')
+                
+                if char in simbolos_binarios and self.regex[i+1] == ')':
+                    raise Exception('La expresión regular infix no puede tener un operador seguido de un paréntesis de cierre.')
+
+                if (char == '(' and self.regex[i+1] in simbolos_unarios) or (char == '(' and self.regex[i+1] in simbolos_binarios):
+                    raise Exception('La expresión regular infix no puede tener un paréntesis de apertura seguido de un operador.')
+
+                if (char == '(' and self.regex[i+1] == ')'):
+                    raise Exception('La expresión regular infix no puede tener un paréntesis de apertura seguido de un paréntesis de cierre.')
+
+                if char in simbolos_binarios and self.regex[i+1] in simbolos_unarios:
+                    raise Exception('La expresión regular infix no puede tener un operador seguido de un operador unario como "*", "+", "?".')
 
         if self.regex[-1] in ['|', '.']:
             raise Exception('La expresión regular infix no puede terminar con un operador como ".", "|".')
@@ -60,8 +91,7 @@ class Postfix:
             raise Exception('Los paréntesis de la expresión regular no están balanceados.')
 
         if self.regex.count('[') > 1 or self.regex.count(']') > 1:
-            raise Exception('La expresión regular no puede tener más de un conjunto de caracteres. Ejemplo: "[", "]".')
-
+            raise Exception('La expresión regular no puede tener más de un conjunto de caracteres. Ejemplo: "[]" o "()", no ambos.')
 
     # Basado en el algoritmo de Shunting-yard
     def to_postfix(self):
