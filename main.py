@@ -12,9 +12,11 @@ from simulacion import Simulacion
 
 def main():
     
-    expresion = ["?",")cd(*","(a|(b|c)?","(a|?)a","a|b )*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*a", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
+    expresion = ["?",")cd(*","(a|(b|c)?","(a|?)a","(a*|b*)*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*a", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
     prueba = ['ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
     opcion = 0
+
+    # test (a*|b*)*
 
     while True:
         print("\nExpresiones Regulares:")
@@ -34,11 +36,11 @@ def main():
             afn = AFN(tree.root)
             Graph(afn, postfix_expr.regex, "AFN")
 
-            for test in prueba:
-                print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
-
             afd_subconjuntos = AFD_Subconjuntos(afn)
             Graph(afd_subconjuntos, postfix_expr.regex, "AFD_Subconjuntos")
+
+            for test in prueba:
+                print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
 
             opcion = 0
 
