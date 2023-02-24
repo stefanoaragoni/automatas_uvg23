@@ -5,23 +5,23 @@ from afn import AFN
 def Graph(automata, regex):
     dot = Digraph()
 
-    # Set graph attributes
+    # Atributos del grafo
     dot.attr(rankdir="LR")
     tempStr = str("\AFN: Thompson ["+regex+"]")
     dot.attr(label=tempStr)
     dot.attr(fontsize='20')
     
-    # Add initial state
+    # Agrega estado inicial
     dot.attr('node', shape='circle')
     dot.node("", shape='none',height='0',width='0')
     dot.node(str(automata.estado_inicial.id), shape="circle")
     dot.edge("", str(automata.estado_inicial.id))
 
-    # Add final states
+    # Agrega estados finales
     for final_state in automata.EstadosFinales.Elementos:
         dot.node(str(final_state.id), shape="circle", peripheries="2")
 
-    # Add states and transitions
+    # Agrega estados y transiciones
     for estado in automata.Estados.Elementos:
         if estado != automata.estado_inicial and estado not in automata.EstadosFinales.Elementos:
             dot.node(str(estado.id), shape="circle")
@@ -29,5 +29,5 @@ def Graph(automata, regex):
     for transicion in automata.transiciones:
         dot.edge(str(transicion.estado_origen.id), str(transicion.estado_destino.id), label=transicion.el_simbolo.c_id)
 
-    # Render graph
+    # Genera el grafo
     dot.render("automata", view=True)
