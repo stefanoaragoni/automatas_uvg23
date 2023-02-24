@@ -12,7 +12,7 @@ from simulacion import Simulacion
 def main():
     
     expresion = ["?",")cd(*","(a|(b|c)?","(a|?)a","a|b )*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*a", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
-    prueba = ['ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
+    prueba = ['a','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
     opcion = 0
 
     while True:
@@ -24,21 +24,28 @@ def main():
 
         if opcion > 0 and opcion <= len(expresion):
             postfix_expr = Postfix(expresion[opcion-1])
-            print("\nExpresión Regular (infix):",postfix_expr.regex)
-            print("\nExpresión Regular (postfix):",postfix_expr.postfix)
 
-            tree = Arbol(postfix_expr.postfix)
-            tree.print_tree(postfix_expr.postfix)
+            if postfix_expr.error:
+                print("\nExpresión Regular inválida!") 
+                opcion = 0
+                input("\nPresione ENTER para continuar...")
 
-            afn = AFN(tree.root)
-            Graph(afn, postfix_expr.regex)
+            else:
+                print("\nExpresión Regular (infix):",postfix_expr.regex)
+                print("\nExpresión Regular (postfix):",postfix_expr.postfix)
 
-            for test in prueba:
-                print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
+                tree = Arbol(postfix_expr.postfix)
+                tree.print_tree(postfix_expr.postfix)
 
-            opcion = 0
+                afn = AFN(tree.root)
+                Graph(afn, postfix_expr.regex)
 
-            input("\nPresione ENTER para continuar...")
+                for test in prueba:
+                    print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
+
+                opcion = 0
+
+                input("\nPresione ENTER para continuar...")
         else:
             print("\nOpción inválida, adiós!")
             break

@@ -10,12 +10,14 @@ class Postfix:
         self.operators = ['|', '.', '*', '+', '?']
         self.operator_precedence = {'|': 1, '.': 2, '*': 3, '+': 3, '?': 3}
         self.regex = regex
+        self.error = False
 
         self.verify_parenthesis()
         self.regex = self.add_concatenation()
-
-        self.verify_regex()
-        self.postfix = self.to_postfix()
+        if not self.error:
+            self.verify_regex()
+            if not self.error:
+                self.postfix = self.to_postfix()
 
     # Agrega paréntesis de cierre o apertura para balancear la expresión regular.
     def verify_parenthesis(self):
@@ -36,12 +38,16 @@ class Postfix:
                 stack.append(i)
             elif c == ')':
                 if len(stack) == 0:
-                    raise Exception(f"\nDeteccion Error: Se encontro un parentesis de cierre sin su correspondiente apertura en la posición {i}.")
+                    print(f"\nDeteccion Error: Se encontro un parentesis de cierre sin su correspondiente apertura en la posición {i}.")
+                    self.error = True
+                    break
                 stack.pop()
 
         if len(stack) > 0:
             for i in stack[::-1]:
-                raise Exception(f"\nDeteccion Error: Se encontro un parentesis de apertura sin su correspondiente cierre en la posición {i}.")
+                print(f"\nDeteccion Error: Se encontro un parentesis de apertura sin su correspondiente cierre en la posición {i}.")
+                self.error = True
+                break
 
 
     # Agrega un punto de concatenación entre caracteres
@@ -58,40 +64,59 @@ class Postfix:
     # Verifica que la expresión regular infix sea válida; si no lo es, lanza una excepción
     def verify_regex(self):
         if self.regex == '':
-            raise Exception('La expresión regular no puede estar vacía.')
+            print('La expresión regular no puede estar vacía.')
+            self.error = True
+            return
         if self.regex[0] in self.operators:
-            raise Exception('La expresión regular infix no puede iniciar con un operador.')
+            print('La expresión regular infix no puede iniciar con un operador.')
+            self.error = True
+            return
 
         simbolos_binarios = ['|', '.']
         simbolos_unarios = ['*', '+', '?']
         for i, char in enumerate(self.regex):
             if i+1 < len(self.regex):
                 if char == ')' and self.regex[i+1] == '(':
-                    raise Exception('La expresión regular infix no puede tener dos expresiones seguidas sin operador.')
+                    print('La expresión regular infix no puede tener dos expresiones seguidas sin operador.')
+                    self.error = True
+                    break
                 
                 if char in simbolos_binarios and self.regex[i+1] in simbolos_binarios:
-                    raise Exception('La expresión regular infix no puede tener dos operadores seguidos como ".", "|".')
+                    print('La expresión regular infix no puede tener dos operadores seguidos como ".", "|".')
+                    self.error = True
+                    break
                 
                 if char in simbolos_binarios and self.regex[i+1] == ')':
-                    raise Exception('La expresión regular infix no puede tener un operador seguido de un paréntesis de cierre.')
+                    print('La expresión regular infix no puede tener un operador seguido de un paréntesis de cierre.')
+                    self.error = True
+                    break
 
                 if (char == '(' and self.regex[i+1] in simbolos_unarios) or (char == '(' and self.regex[i+1] in simbolos_binarios):
-                    raise Exception('La expresión regular infix no puede tener un paréntesis de apertura seguido de un operador.')
+                    print('La expresión regular infix no puede tener un paréntesis de apertura seguido de un operador.')
+                    self.error = True
+                    break
 
                 if (char == '(' and self.regex[i+1] == ')'):
-                    raise Exception('La expresión regular infix no puede tener un paréntesis de apertura seguido de un paréntesis de cierre.')
+                    print('La expresión regular infix no puede tener un paréntesis de apertura seguido de un paréntesis de cierre.')
+                    self.error = True
+                    break
 
                 if char in simbolos_binarios and self.regex[i+1] in simbolos_unarios:
-                    raise Exception('La expresión regular infix no puede tener un operador seguido de un operador unario como "*", "+", "?".')
+                    print('La expresión regular infix no puede tener un operador seguido de un operador unario como "*", "+", "?".')
+                    self.error = True
+                    break
 
         if self.regex[-1] in ['|', '.']:
-            raise Exception('La expresión regular infix no puede terminar con un operador como ".", "|".')
+            print('La expresión regular infix no puede terminar con un operador como ".", "|".')
+            self.error = True
             
         if self.regex.count('(') != self.regex.count(')'):
-            raise Exception('Los paréntesis de la expresión regular no están balanceados.')
+            print('Los paréntesis de la expresión regular no están balanceados.')
+            self.error = True
 
         if self.regex.count('[') > 1 or self.regex.count(']') > 1:
-            raise Exception('La expresión regular no puede tener más de un conjunto de caracteres. Ejemplo: "[]" o "()", no ambos.')
+            print('La expresión regular no puede tener más de un conjunto de caracteres. Ejemplo: "[]" o "()", no ambos.')
+            self.error = True
 
     # Basado en el algoritmo de Shunting-yard
     def to_postfix(self):
