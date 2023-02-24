@@ -41,7 +41,7 @@ def main():
                 tree.print_tree(postfix_expr.postfix)
 
                 afn = AFN(tree.root)
-                Graph(afn, postfix_expr.regex)
+                Graph(afn, postfix_expr.regex, "AFN")
 
                 for test in prueba:
                     print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
