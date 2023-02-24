@@ -12,8 +12,8 @@ from simulacion import Simulacion
 
 def main():
     
-    expresion = ["?",")cd(*","(a|(b|c)?","(a|?)a","(a*|b*)*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*a", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
-    prueba = ['ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
+    expresion = ["?",")cd(*","(a|(b|c)?","(a|?)a","a|b )*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*a", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
+    prueba = ['a','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
     opcion = 0
 
     # test (a*|b*)*
@@ -27,24 +27,31 @@ def main():
 
         if opcion > 0 and opcion <= len(expresion):
             postfix_expr = Postfix(expresion[opcion-1])
-            print("\nExpresión Regular (infix):",postfix_expr.regex)
-            print("\nExpresión Regular (postfix):",postfix_expr.postfix)
 
-            tree = Arbol(postfix_expr.postfix)
-            tree.print_tree(postfix_expr.postfix)
+            if postfix_expr.error:
+                print("\nExpresión Regular inválida!") 
+                opcion = 0
+                input("\nPresione ENTER para continuar...")
 
-            afn = AFN(tree.root)
-            Graph(afn, postfix_expr.regex, "AFN")
+            else:
+                print("\nExpresión Regular (infix):",postfix_expr.regex)
+                print("\nExpresión Regular (postfix):",postfix_expr.postfix)
 
-            afd_subconjuntos = AFD_Subconjuntos(afn)
-            Graph(afd_subconjuntos, postfix_expr.regex, "AFD_Subconjuntos")
+                tree = Arbol(postfix_expr.postfix)
+                tree.print_tree(postfix_expr.postfix)
 
-            for test in prueba:
-                print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
+                afn = AFN(tree.root)
+                Graph(afn, postfix_expr.regex)
 
-            opcion = 0
+                for test in prueba:
+                    print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
 
-            input("\nPresione ENTER para continuar...")
+                afd_subconjuntos = AFD_Subconjuntos(afn)
+                Graph(afd_subconjuntos, postfix_expr.regex, "AFD_Subconjuntos")
+
+                opcion = 0
+
+                input("\nPresione ENTER para continuar...")
         else:
             print("\nOpción inválida, adiós!")
             break
