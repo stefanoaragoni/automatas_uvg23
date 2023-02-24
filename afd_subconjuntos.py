@@ -77,7 +77,6 @@ class AFD_Subconjuntos(Automata):
 
     # https://www.cs.scranton.edu/~mccloske/courses/cmps260/nfa_to_dfa.html
     def afd_construccion(self):
-        # Initialize the queue with the first state
         current_state_id = 0
         first_state = [self.subconjuntos[current_state_id], current_state_id]
 
