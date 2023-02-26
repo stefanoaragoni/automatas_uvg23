@@ -22,7 +22,7 @@ class AFD_Subconjuntos(Automata):
 
         self.contador_estados = 0
 
-        first_state = self.e_closure(afn.estado_inicial, self.ascii)
+        first_state = self.e_closure_check(afn.estado_inicial, self.ascii)
         first_state = sorted(first_state.Elementos, key=lambda estado: estado.id)
         first_state_temp = Set()
         first_state_temp.AddItems(first_state)

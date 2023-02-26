@@ -27,10 +27,11 @@ class AFD_Directo(Automata):
         # calcular followpos
         self.arbol.root.followpos_calc(self.arbol.root)
 
-        #simbolos de transicion
+        # simbolos de transicion
         self.simbolos = self.get_simbolos(self.arbol.root)
 
-        self.arbol.root.print_info_direct_tree(self.arbol.root)
+        # Imprimir followpos-es
+        #self.arbol.root.print_info_direct_tree(self.arbol.root)
 
         # Construir el automata
         self.construccion()
