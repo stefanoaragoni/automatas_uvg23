@@ -46,6 +46,9 @@ class Set:
 
     def returnLastItem(self):
         return self.Elementos[-1]
+    
+    def returnFirstItem(self):
+        return self.Elementos[0]
 
     def deleteItem(self, item):
         if item in self.Elementos:

@@ -84,8 +84,6 @@ class AFD_Subconjuntos(Automata):
         queue = Set()
         queue.AddItem(first_state)
 
-        self.estado_inicial = Estado(current_state_id)
-
         # Mientras la cola tenga elementos
         while queue.Elementos:
             # Obtiene el primer estado de la cola
@@ -137,10 +135,15 @@ class AFD_Subconjuntos(Automata):
 
         # Agrega los estados finales
         for i in range(0, len(self.subconjuntos)):
-            self.Estados.AddItem(Estado(i))
+            estado_temp = Estado(i)
+            self.Estados.AddItem(estado_temp)
+
+            if i == 0:
+                self.estado_inicial = estado_temp
+
             for estado in self.subconjuntos[i].Elementos:
                 if estado in self.afn.EstadosFinales.Elementos:
-                    self.EstadosFinales.AddItem(Estado(i))
+                    self.EstadosFinales.AddItem(estado_temp)
                     break
 
         # Agrega las transiciones

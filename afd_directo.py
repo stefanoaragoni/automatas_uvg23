@@ -105,7 +105,7 @@ class AFD_Directo(Automata):
             if dstate[0] == 0:
                 self.estado_inicial = estado_temp
 
-            self.Estados.AddItem(Estado(dstate[0]))
+            self.Estados.AddItem(estado_temp)
 
         # Crear las transiciones
         for transicion in dtran:

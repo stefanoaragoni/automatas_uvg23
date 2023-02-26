@@ -14,3 +14,11 @@ class Automata:
         for estado in self.Estados.Elementos:
             if estado.id == id:
                 return estado
+            
+    def GetTransicion(self, estado_origen, simbolo):
+        for transicion in self.transiciones:
+            if transicion.estado_origen == estado_origen and transicion.simbolo.id == simbolo.id:
+                return transicion
+            
+    
+

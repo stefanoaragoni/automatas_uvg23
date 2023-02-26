@@ -6,6 +6,7 @@ from automata import Automata
 from afn import AFN
 from afd_subconjuntos import AFD_Subconjuntos
 from afd_directo import AFD_Directo
+from afd_minimizacion import AFD_Minimizacion
 from postfix import Postfix
 from arbol import Arbol
 from graph import Graph
@@ -52,6 +53,12 @@ def main():
 
                 afd_directo = AFD_Directo(tree)
                 Graph(afd_directo, postfix_expr.regex, "AFD_Directo")
+
+                afd_minimizacion_subconjuntos = AFD_Minimizacion(afd_subconjuntos)
+                Graph(afd_minimizacion_subconjuntos, postfix_expr.regex, "AFD_Subconjuntos_Minimizado")
+
+                afd_minimizacion_directo = AFD_Minimizacion(afd_directo)
+                Graph(afd_minimizacion_directo, postfix_expr.regex, "AFD_Directo_Minimizado")
 
                 opcion = 0
 

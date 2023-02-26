@@ -8,8 +8,6 @@ digraph {
 	"" -> 0
 	0 [peripheries=2 shape=circle]
 	1 [peripheries=2 shape=circle]
-	0 [shape=circle]
-	1 [shape=circle]
 	0 -> 1 [label=a]
 	1 -> 1 [label=a]
 }
