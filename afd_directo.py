@@ -28,7 +28,7 @@ class AFD_Directo(Automata):
         self.arbol.root.followpos_calc(self.arbol.root)
 
         # simbolos de transicion
-        self.simbolos = self.get_simbolos(self.arbol.root)
+        self.Simbolos = self.get_simbolos(self.arbol.root)
 
         # Imprimir followpos-es
         #self.arbol.root.print_info_direct_tree(self.arbol.root)
@@ -71,7 +71,7 @@ class AFD_Directo(Automata):
         for dstate in dstates:
             dstate[1][1] = True
 
-            for simbolo in self.simbolos.Elementos:
+            for simbolo in self.Simbolos.Elementos:
                 
                 union = Set()
                 for pos in dstate[1][0].Elementos:

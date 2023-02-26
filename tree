@@ -1,10 +1,30 @@
 digraph {
-	"d6713b8d-e59d-4619-ada7-a72328c50ab6" [label="*"]
-	"9b142b91-736d-4f92-a2e1-2b8794c4323b" [label="*"]
-	"580fb029-e075-4e7f-b190-6d795551aaa7" [label="*"]
-	"bf0ba138-f603-44e3-9792-830f7b25ecd6" [label=a]
-	"580fb029-e075-4e7f-b190-6d795551aaa7" -> "bf0ba138-f603-44e3-9792-830f7b25ecd6"
-	"9b142b91-736d-4f92-a2e1-2b8794c4323b" -> "580fb029-e075-4e7f-b190-6d795551aaa7"
-	"d6713b8d-e59d-4619-ada7-a72328c50ab6" -> "9b142b91-736d-4f92-a2e1-2b8794c4323b"
-	label="a***"
+	"e2cf8153-663f-40cc-b35c-ce17cc2df7cd" [label="."]
+	"154d82d4-9e28-480f-9eab-6f6044e50a13" [label="."]
+	"cf71e3a7-cad9-40d7-a67d-71bcc5f15333" [label="."]
+	"0e6e0f9b-47f8-49ae-b679-48617b0a5ac9" [label="*"]
+	"192272d7-746e-41fb-9bd4-f4ac45fa4b99" [label="|"]
+	"d91bb26e-ed8f-4a15-b3b9-53a3d16463c5" [label=a]
+	"192272d7-746e-41fb-9bd4-f4ac45fa4b99" -> "d91bb26e-ed8f-4a15-b3b9-53a3d16463c5"
+	"cba834d0-5023-483e-8a31-221e860d5351" [label=b]
+	"192272d7-746e-41fb-9bd4-f4ac45fa4b99" -> "cba834d0-5023-483e-8a31-221e860d5351"
+	"0e6e0f9b-47f8-49ae-b679-48617b0a5ac9" -> "192272d7-746e-41fb-9bd4-f4ac45fa4b99"
+	"cf71e3a7-cad9-40d7-a67d-71bcc5f15333" -> "0e6e0f9b-47f8-49ae-b679-48617b0a5ac9"
+	"02c60a85-b5e3-42a5-a0d6-38bdf3d61c6c" [label=a]
+	"cf71e3a7-cad9-40d7-a67d-71bcc5f15333" -> "02c60a85-b5e3-42a5-a0d6-38bdf3d61c6c"
+	"154d82d4-9e28-480f-9eab-6f6044e50a13" -> "cf71e3a7-cad9-40d7-a67d-71bcc5f15333"
+	"08d95ed0-a333-43fd-b89f-0bbb2bbde6af" [label="|"]
+	"c07895c2-6e45-489c-923b-b89591c7c899" [label=a]
+	"08d95ed0-a333-43fd-b89f-0bbb2bbde6af" -> "c07895c2-6e45-489c-923b-b89591c7c899"
+	"51341982-591d-454a-b0f6-f0c3adffd4d2" [label=b]
+	"08d95ed0-a333-43fd-b89f-0bbb2bbde6af" -> "51341982-591d-454a-b0f6-f0c3adffd4d2"
+	"154d82d4-9e28-480f-9eab-6f6044e50a13" -> "08d95ed0-a333-43fd-b89f-0bbb2bbde6af"
+	"e2cf8153-663f-40cc-b35c-ce17cc2df7cd" -> "154d82d4-9e28-480f-9eab-6f6044e50a13"
+	"6d4c6794-0f9e-4cbf-8837-b408689a7e38" [label="|"]
+	"4960bbb7-7ccf-4205-83e0-ce0c748a1bd3" [label=a]
+	"6d4c6794-0f9e-4cbf-8837-b408689a7e38" -> "4960bbb7-7ccf-4205-83e0-ce0c748a1bd3"
+	"f102b58f-81a4-4893-926c-68fbc414938a" [label=b]
+	"6d4c6794-0f9e-4cbf-8837-b408689a7e38" -> "f102b58f-81a4-4893-926c-68fbc414938a"
+	"e2cf8153-663f-40cc-b35c-ce17cc2df7cd" -> "6d4c6794-0f9e-4cbf-8837-b408689a7e38"
+	label="ab|*a.ab|.ab|."
 }

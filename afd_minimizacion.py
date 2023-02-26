@@ -49,7 +49,10 @@ class AFD_Minimizacion(Automata):
                         X.AddItem(t.estado_origen)
 
                 for Y in P.Elementos:
-                    if (not X.Interseccion(Y).IsEmpty()) and (not X.Diferencia(Y).IsEmpty()):
+                    interseccion_empty = X.Interseccion(Y).IsEmpty()
+                    diferencia_empty = Y.Diferencia(X).IsEmpty()
+
+                    if (not interseccion_empty) and (not diferencia_empty):
                         intersection = X.Interseccion(Y)
                         difference = Y.Diferencia(X)
 
@@ -69,8 +72,11 @@ class AFD_Minimizacion(Automata):
 
         
         estados_temp = []
+        cantidad_estados = len(P.Elementos)
         for enu, conjunto in enumerate(P.Elementos):
-            estado_actual = Estado(enu)
+
+            estado_actual = Estado(cantidad_estados - enu - 1)
+
             self.Estados.AddItem(estado_actual)
             estados_temp.append([estado_actual, conjunto])
 
@@ -99,4 +105,6 @@ class AFD_Minimizacion(Automata):
         for estado, estado2, simbolo in transiciones_temp:
             self.transiciones.append(Transicion(estado, estado2, simbolo))
 
+        
+        print("P:", P.Elementos)
 
