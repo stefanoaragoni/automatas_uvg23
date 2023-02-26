@@ -11,6 +11,7 @@ from postfix import Postfix
 from arbol import Arbol
 from graph import Graph
 from simulacion import Simulacion
+from prettytable import PrettyTable
 
 def main():
     
@@ -45,9 +46,6 @@ def main():
                 afn = AFN(tree.root)
                 Graph(afn, postfix_expr.regex, "AFN")
 
-                for test in prueba:
-                    print("\nCadena:", test, "-->", Simulacion(afn, test).resultado)
-
                 afd_subconjuntos = AFD_Subconjuntos(afn)
                 Graph(afd_subconjuntos, postfix_expr.regex, "AFD_Subconjuntos")
 
@@ -60,8 +58,46 @@ def main():
                 afd_minimizacion_directo = AFD_Minimizacion(afd_directo)
                 Graph(afd_minimizacion_directo, postfix_expr.regex, "AFD_Directo_Minimizado")
 
-                opcion = 0
+                print("\nSimulacion:")
+                resultados_simulacion = {}
 
+                for test in prueba:
+                    resultados_simulacion[test] = [0,0]
+
+                    if Simulacion(afn, test).resultado == True:
+                        resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
+                    else:
+                        resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
+
+                    if Simulacion(afd_subconjuntos, test).resultado == True:
+                        resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
+                    else:
+                        resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
+
+                    if Simulacion(afd_directo, test).resultado == True:
+                        resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
+                    else:
+                        resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
+                    
+                    if Simulacion(afd_minimizacion_subconjuntos, test).resultado == True:
+                        resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
+                    else:
+                        resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
+
+
+                    if Simulacion(afd_minimizacion_directo, test).resultado == True:
+                        resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
+                    else:
+                        resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
+                    
+
+                table = PrettyTable()
+                table.field_names = ["Test", "True", "False"]
+                for test, results in resultados_simulacion.items():
+                    table.add_row([test, results[0], results[1]])
+                print(table)
+
+                opcion = 0
                 input("\nPresione ENTER para continuar...")
         else:
             print("\nOpción inválida, adiós!")
