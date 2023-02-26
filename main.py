@@ -5,6 +5,7 @@ from transicion import Transicion
 from automata import Automata
 from afn import AFN
 from afd_subconjuntos import AFD_Subconjuntos
+from afd_directo import AFD_Directo
 from postfix import Postfix
 from arbol import Arbol
 from graph import Graph
@@ -12,7 +13,7 @@ from simulacion import Simulacion
 
 def main():
     
-    expresion = ["?",")cd(*","(a|(b|c)?","(a|?)a","a|b )*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
+    expresion = ["(a|b)*abb",")cd(*","(a|(b|c)?","(a|?)a","a|b )*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
     prueba = ['a','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
     opcion = 0
 
@@ -48,6 +49,9 @@ def main():
 
                 afd_subconjuntos = AFD_Subconjuntos(afn)
                 Graph(afd_subconjuntos, postfix_expr.regex, "AFD_Subconjuntos")
+
+                afd_directo = AFD_Directo(tree)
+                #Graph(afd_directo, postfix_expr.regex, "AFD_Directo")
 
                 opcion = 0
 
