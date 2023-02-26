@@ -1,15 +1,20 @@
 digraph {
 	rankdir=LR
-	label="\ AFD_Directo [(a*|b*)] "
+	label="\ AFD_Directo [(b|b)*.a.b.b.(a|b)*] "
 	fontsize=20
 	node [shape=circle]
 	"" [height=0 shape=none width=0]
 	0 [shape=circle]
 	"" -> 0
-	0 [peripheries=2 shape=circle]
-	1 [peripheries=2 shape=circle]
+	3 [peripheries=2 shape=circle]
 	0 [shape=circle]
 	1 [shape=circle]
+	2 [shape=circle]
+	3 [shape=circle]
+	0 -> 0 [label=b]
 	0 -> 1 [label=a]
-	0 -> 1 [label=b]
+	1 -> 2 [label=b]
+	2 -> 3 [label=b]
+	3 -> 3 [label=b]
+	3 -> 3 [label=a]
 }

@@ -189,7 +189,7 @@ class Nodo:
             izq = self.firstpos_calc(node.izq)
             der = self.firstpos_calc(node.der)
 
-            if self.nullable_calc(node.izq):
+            if node.izq.nullable:
                 node.firstpos = izq.Union(der)
                 return node.firstpos
             
@@ -217,8 +217,8 @@ class Nodo:
             izq = self.lastpos_calc(node.izq)
             der = self.lastpos_calc(node.der)
 
-            if self.nullable_calc(node.der):
-                node.lastpos = izq.Union(der)
+            if node.der.nullable:
+                node.lastpos = der.Union(izq)
                 return node.lastpos
             else:
                 node.lastpos = der
@@ -250,6 +250,10 @@ class Nodo:
                 for position in root.lastpos.Elementos:
                     nodo_temp = self.find_node_by_id(root, position)
                     nodo_temp.followpos = nodo_temp.followpos.Union(root.firstpos)
+
+            elif root.valor == '|':
+                self.followpos_calc(root.der)
+                self.followpos_calc(root.izq)
             
     def find_node_by_id(self, root, id):
         if root.id == id:

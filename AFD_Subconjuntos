@@ -1,19 +1,31 @@
 digraph {
 	rankdir=LR
-	label="\ AFD_Subconjuntos [(a*|b*)] "
+	label="\ AFD_Subconjuntos [(b|b)*.a.b.b.(a|b)*] "
 	fontsize=20
 	node [shape=circle]
 	"" [height=0 shape=none width=0]
 	0 [shape=circle]
 	"" -> 0
-	0 [peripheries=2 shape=circle]
-	1 [peripheries=2 shape=circle]
-	2 [peripheries=2 shape=circle]
+	4 [peripheries=2 shape=circle]
+	5 [peripheries=2 shape=circle]
+	6 [peripheries=2 shape=circle]
 	0 [shape=circle]
 	1 [shape=circle]
 	2 [shape=circle]
-	0 -> 1 [label=a]
-	0 -> 2 [label=b]
-	1 -> 1 [label=a]
-	2 -> 2 [label=b]
+	3 [shape=circle]
+	4 [shape=circle]
+	5 [shape=circle]
+	6 [shape=circle]
+	0 -> 1 [label=b]
+	0 -> 2 [label=a]
+	1 -> 1 [label=b]
+	1 -> 2 [label=a]
+	2 -> 3 [label=b]
+	3 -> 4 [label=b]
+	4 -> 5 [label=b]
+	4 -> 6 [label=a]
+	5 -> 5 [label=b]
+	5 -> 6 [label=a]
+	6 -> 5 [label=b]
+	6 -> 6 [label=a]
 }

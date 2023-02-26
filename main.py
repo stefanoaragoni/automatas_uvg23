@@ -13,7 +13,7 @@ from simulacion import Simulacion
 
 def main():
     
-    expresion = ["a***","?",")cd(*","(a|(b|c)?","(a|?)a","a|b )*","ab*ab*", "0?(1?)?0*", "(a*|b*)", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
+    expresion = ["a***","?",")cd(*","(a|(b|c)?","(a|?)a","a|b )*","ab*ab*", "0?(1?)?0*", "(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)"]
     prueba = ['a','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
     opcion = 0
 
