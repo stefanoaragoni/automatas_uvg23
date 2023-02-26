@@ -70,12 +70,13 @@ class AFD_Minimizacion(Automata):
                             else:
                                 W.AddItem(difference)
 
-        
+        P.Elementos.sort(key=lambda x: x.size(), reverse=False)
+        P.Elementos.sort(key=lambda x: x.Elementos[0].id)
+
         estados_temp = []
-        cantidad_estados = len(P.Elementos)
         for enu, conjunto in enumerate(P.Elementos):
 
-            estado_actual = Estado(cantidad_estados - enu - 1)
+            estado_actual = Estado(enu)
 
             self.Estados.AddItem(estado_actual)
             estados_temp.append([estado_actual, conjunto])
@@ -105,6 +106,4 @@ class AFD_Minimizacion(Automata):
         for estado, estado2, simbolo in transiciones_temp:
             self.transiciones.append(Transicion(estado, estado2, simbolo))
 
-        
-        print("P:", P.Elementos)
 
