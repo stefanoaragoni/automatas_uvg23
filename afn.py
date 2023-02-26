@@ -26,7 +26,6 @@ class AFN(Automata):
         # Creacion del automata
         self.afn_construction(self.tree)
         self.estados_calc()
-        print("DONE")
 
     # Obtiene los simbolos del arbol de expresiones regulares
     def get_simbolos(self, tree_node):

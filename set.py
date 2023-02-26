@@ -23,6 +23,14 @@ class Set:
             if item not in A.Elementos:
                 diferencia.AddItem(item)
         return diferencia
+
+    def Equals(self, A):
+        if len(self.Elementos) != len(A.Elementos):
+            return False
+        for item in self.Elementos:
+            if item not in A.Elementos:
+                return False
+        return True
     
     def AddItem(self, item):
         if item not in self.Elementos:
