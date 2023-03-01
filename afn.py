@@ -128,7 +128,7 @@ class AFN(Automata):
             self.Estados.AddItem(b1)
             self.Estados.AddItem(a2)
             self.count_estados -= 1
-            return b1, a2, s2
+            return a1, a2, s2
 
         if hijoIzqHojaIzq is None and hijoIzqHojaDer is not None:
             
@@ -152,7 +152,7 @@ class AFN(Automata):
                     transicion.estado_destino = a2
                     self.Estados.deleteItem(b1)
                     
-            return a2, b2, s2
+            return a1, b2, s2
 
     def afn_or(self, hojaIzq, hojaDer):
         hijoIzqHojaIzq = hojaIzq.izq
