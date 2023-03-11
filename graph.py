@@ -2,12 +2,12 @@ from graphviz import Digraph
 from automata import Automata
 from afn import AFN
 
-def Graph(automata, regex):
+def Graph(automata, regex, type):
     dot = Digraph()
 
     # Atributos del grafo
     dot.attr(rankdir="LR")
-    tempStr = str("\AFN: Thompson ["+regex+"]")
+    tempStr = str("\ "+type+" ["+regex+"] ")
     dot.attr(label=tempStr)
     dot.attr(fontsize='20')
     
@@ -29,5 +29,5 @@ def Graph(automata, regex):
     for transicion in automata.transiciones:
         dot.edge(str(transicion.estado_origen.id), str(transicion.estado_destino.id), label=transicion.el_simbolo.c_id)
 
-    # Genera el grafo
-    dot.render("automata", view=True)
+    # Render graph
+    dot.render(type, view=True, format='pdf')

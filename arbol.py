@@ -1,6 +1,7 @@
 from simbolo import Simbolo
 import uuid
 from graphviz import Digraph
+from set import Set
 
 '''
     Arbol de expresiones regulares generado a partir de una expresión regular en postfix.
@@ -16,12 +17,15 @@ from graphviz import Digraph
 '''
 class Arbol:
     # Constructor
-    def __init__(self, regex):
+    def __init__(self, regex, root=None):
         self.operators = ['|', '.', '*', '+', '?']
         self.operator_precedence = {'|': 1, '.': 2, '*': 3, '+': 3, '?': 3}
         self.regex = regex
 
-        self.root = self.construct_tree()
+        if root:
+            self.root = root
+        else:
+            self.root = self.construct_tree()
 
     # Construye el árbol de expresiones regulares
     def construct_tree(self):
@@ -81,6 +85,9 @@ class Arbol:
             self.add_node(dot, node.der)
             dot.edge(str(node.id), str(node.der.id))
 
+    def arbol_directo(self):
+        arbol_nuevo = Nodo('.', self.root, Nodo('#'))
+        return Arbol(self.regex, arbol_nuevo)
 
 '''
     Clase Nodo almacena el valor de un nodo del árbol de expresiones regulares.
@@ -97,6 +104,16 @@ class Nodo:
 
         self.root = False
         self.analized = False
+
+        self.nullable = False
+        self.firstpos = Set()
+        self.lastpos = Set()
+        self.followpos = Set()
+
+        if (valor != '|' and valor != '.' and valor != '*' and valor != '+' and valor != '?'):
+            self.firstpos.AddItem(self.id)
+            self.lastpos.AddItem(self.id)           
+            
 
     def find_parent(self, root, node):
         # Si el nodo es la raiz, regresa None.
@@ -133,3 +150,154 @@ class Nodo:
         # Si la raiz tiene un hijo izquierdo, recursivamente recorre su subarbol izquierdo.
         if root.izq is not None:
             return self.find_leftmost_leaf(root.izq)
+        
+    def nullable_calc(self, node):
+        if node.valor == 'ε':
+            node.nullable = True
+            return node.nullable
+        
+        elif node.valor == '|':
+            izq = self.nullable_calc(node.izq)
+            der = self.nullable_calc(node.der)
+            node.nullable = izq or der
+            return node.nullable
+        
+        elif node.valor == '.':
+            izq = self.nullable_calc(node.izq)
+            der = self.nullable_calc(node.der)
+            node.nullable = izq and der
+            return node.nullable
+        
+        elif node.valor == '*':
+            node.nullable = True
+            izq = self.nullable_calc(node.izq)
+            return node.nullable
+        
+        else:
+            node.nullable = False
+            return node.nullable
+    
+
+    def firstpos_calc(self, node):
+        if node.valor == '|':
+            izq = self.firstpos_calc(node.izq)
+            der = self.firstpos_calc(node.der)
+
+            node.firstpos = izq.Union(der)
+            return node.firstpos
+        
+        elif node.valor == '.':
+            izq = self.firstpos_calc(node.izq)
+            der = self.firstpos_calc(node.der)
+
+            if node.izq.nullable:
+                node.firstpos = izq.Union(der)
+                return node.firstpos
+            
+            else:
+                node.firstpos = izq
+                return node.firstpos
+        
+        elif node.valor == '*':
+            izq = self.firstpos_calc(node.izq)
+            node.firstpos = izq
+            return node.firstpos
+        
+        # epsilon or #
+        elif node.valor == 'ε':
+            node.firstpos = Set()
+            return node.firstpos
+        
+        else:
+            return node.firstpos
+        
+    def lastpos_calc(self, node):
+        if node.valor == '|':
+            izq = self.lastpos_calc(node.izq)
+            der = self.lastpos_calc(node.der)
+
+            node.lastpos = izq.Union(der)
+            return node.lastpos
+        
+        elif node.valor == '.':
+            izq = self.lastpos_calc(node.izq)
+            der = self.lastpos_calc(node.der)
+
+            if node.der.nullable:
+                node.lastpos = der.Union(izq)
+                return node.lastpos
+            else:
+                node.lastpos = der
+                return node.lastpos
+        
+        elif node.valor == '*':
+            izq = self.lastpos_calc(node.izq)
+
+            node.lastpos = izq
+            return node.lastpos
+        
+        elif node.valor == 'ε':
+            node.lastpos = Set()
+            return node.lastpos
+        
+        else:
+            return node.lastpos
+        
+    def followpos_calc(self, root):
+        if root.izq is not None:
+
+            if root.valor == '.':
+                self.followpos_calc(root.der)
+                self.followpos_calc(root.izq)
+
+                for position in root.izq.lastpos.Elementos:
+                    nodo_temp = self.find_node_by_id(root, position)
+                    nodo_temp.followpos = nodo_temp.followpos.Union(root.der.firstpos)
+                    
+            elif root.valor == '*':
+                self.followpos_calc(root.izq)
+                
+                for position in root.lastpos.Elementos:
+                    nodo_temp = self.find_node_by_id(root, position)
+                    nodo_temp.followpos = nodo_temp.followpos.Union(root.firstpos)
+
+            elif root.valor == '|':
+                self.followpos_calc(root.der)
+                self.followpos_calc(root.izq)
+            
+    def find_node_by_id(self, root, id):
+        if root.id == id:
+            return root
+
+        if root.izq is not None:
+            node = self.find_node_by_id(root.izq, id)
+            if node is not None:
+                return node
+
+        if root.der is not None:
+            node = self.find_node_by_id(root.der, id)
+            if node is not None:
+                return node
+
+        return None
+
+
+    def print_info_direct_tree(self, root, recursion = True):
+
+        if recursion:
+            print("Simbolo \t\t Followpos")
+        
+        recursion = False
+        
+        print(root.valor, "\t\t", root.followpos.Elementos)
+
+        # Si la raiz tiene hijos
+        if root.izq is not None and root.der is not None:
+            self.print_info_direct_tree(root.izq, recursion)
+            self.print_info_direct_tree(root.der, recursion)
+
+        # Si la raiz tiene un hijo izquierdo, recursivamente recorre su subarbol izquierdo.
+        elif root.izq is not None:
+            self.print_info_direct_tree(root.izq, recursion)
+
+
