@@ -170,6 +170,7 @@ class Nodo:
         
         elif node.valor == '*':
             node.nullable = True
+            izq = self.nullable_calc(node.izq)
             return node.nullable
         
         else:
@@ -202,6 +203,11 @@ class Nodo:
             node.firstpos = izq
             return node.firstpos
         
+        # epsilon or #
+        elif node.valor == 'ε':
+            node.firstpos = Set()
+            return node.firstpos
+        
         else:
             return node.firstpos
         
@@ -228,6 +234,10 @@ class Nodo:
             izq = self.lastpos_calc(node.izq)
 
             node.lastpos = izq
+            return node.lastpos
+        
+        elif node.valor == 'ε':
+            node.lastpos = Set()
             return node.lastpos
         
         else:
