@@ -18,7 +18,7 @@ def main():
     # ((ε|0)1*)* FIXME: No funciona directo
 
     expresion = ["(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)","b*ab?", "b+abc+", "ab*ab*", "0(0|1)*0", "((ε|0)1*)*", "(0|1)*0(0|1)(0|1)", "(00)*(11)*", "(0|1)1*(0|1)", "0?(1|ε)?0*", "((1?)*)*", "(01)*(10)*"]
-    prueba = ['a', 'baa', 'baaa','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb', '1']
+    prueba = ['a', 'baa', 'baaa','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb', '1', 'babcc']
     opcion = 0
 
     while True:
