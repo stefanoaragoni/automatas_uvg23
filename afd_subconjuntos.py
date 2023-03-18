@@ -22,7 +22,7 @@ class AFD_Subconjuntos(Automata):
 
         self.contador_estados = 0
 
-        first_state = self.e_closure_check(afn.estado_inicial, self.ascii)
+        first_state = self.e_closure_check(afn.estado_inicial)
         first_state = sorted(first_state.Elementos, key=lambda estado: estado.id)
         first_state_temp = Set()
         first_state_temp.AddItems(first_state)
@@ -38,24 +38,7 @@ class AFD_Subconjuntos(Automata):
 
         self.afd_construccion()
 
-    def e_closure(self, estado, simbolo_transicion):
-        estados = Set()
-        estados.AddItem(estado)
-
-        visited = Set()
-        visited.AddItem(estado)
-
-        for transicion in self.afn.transiciones:
-            if (transicion.estado_origen == estado and transicion.el_simbolo.id == self.ascii) or (transicion.estado_origen == estado and transicion.el_simbolo.id == simbolo_transicion):
-                nuevo_estado = transicion.estado_destino
-
-                if nuevo_estado not in visited.Elementos:
-                    visited.AddItem(nuevo_estado)
-                    estados = estados.Union(self.e_closure(nuevo_estado, simbolo_transicion))
-
-        return estados
-
-    def e_closure_check(self, estado, simbolo_transicion):
+    def e_closure_check(self, estado):
         visited = Set()
         stack = [estado]
         result = Set()
@@ -74,8 +57,6 @@ class AFD_Subconjuntos(Automata):
 
         return result
 
-
-    # https://www.cs.scranton.edu/~mccloske/courses/cmps260/nfa_to_dfa.html
     def afd_construccion(self):
         current_state_id = 0
         first_state = [self.subconjuntos[current_state_id], current_state_id]
@@ -105,7 +86,7 @@ class AFD_Subconjuntos(Automata):
                 for transicion in self.afn.transiciones:
                     if (transicion.el_simbolo.id == simbolo_transicion) and (transicion.estado_origen in estado_actual.Elementos):
 
-                        temporal_result = self.e_closure_check(transicion.estado_destino, simbolo_transicion)
+                        temporal_result = self.e_closure_check(transicion.estado_destino)
                         estados = estados.Union(temporal_result)
 
 
