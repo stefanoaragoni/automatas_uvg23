@@ -18,7 +18,7 @@ def main():
     # ((ε|0)1*)* FIXME: No funciona directo
 
     expresion = ["(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)","b*ab?", "b+abc+", "ab*ab*", "0(0|1)*0", "((ε|0)1*)*", "(0|1)*0(0|1)(0|1)", "(00)*(11)*", "(0|1)1*(0|1)", "0?(1|ε)?0*", "((1?)*)*", "(01)*(10)*"]
-    prueba = ['a', 'baa', 'baaa','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb']
+    prueba = ['a', 'baa', 'baaa','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb', '1']
     opcion = 0
 
     while True:
@@ -64,35 +64,35 @@ def main():
                 for test in prueba:
                     resultados_simulacion[test] = [0,0]
 
-                    if Simulacion(afn, test).resultado == True:
+                    if Simulacion(afn, test, 'AFN').resultado == True:
                         resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
                     else:
                         resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
 
-                    if Simulacion(afd_subconjuntos, test).resultado == True:
+                    if Simulacion(afd_subconjuntos, test, 'AFD').resultado == True:
                         resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
                     else:
                         resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
 
-                    if Simulacion(afd_directo, test).resultado == True:
+                    if Simulacion(afd_directo, test, 'AFD').resultado == True:
                         resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
                     else:
                         resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
                     
-                    if Simulacion(afd_minimizacion_subconjuntos, test).resultado == True:
+                    if Simulacion(afd_minimizacion_subconjuntos, test, 'AFD').resultado == True:
                         resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
                     else:
                         resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
 
-
-                    if Simulacion(afd_minimizacion_directo, test).resultado == True:
+                    if Simulacion(afd_minimizacion_directo, test, 'AFD').resultado == True:
                         resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
                     else:
                         resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
                     
 
                 table = PrettyTable()
-                table.field_names = ["Test", "True", "False"]
+                table.field_names = ["Test", "Sí", "No"]
+                print(expresion[opcion-1])
                 for test, results in resultados_simulacion.items():
                     table.add_row([test, results[0], results[1]])
                 print(table)
