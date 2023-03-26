@@ -21,8 +21,6 @@ class Postfix:
 
     # Agrega paréntesis de cierre o apertura para balancear la expresión regular.
     def verify_parenthesis(self):
-        self.regex = self.regex.replace(' ', '')
-
         num_open = self.regex.count('(')
         num_close = self.regex.count(')')
         if num_open > num_close:

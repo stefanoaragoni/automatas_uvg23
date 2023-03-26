@@ -83,8 +83,6 @@ class YalParser():
             # almacena en diccionario
             self.lets[new_line[0]] = new_line[1]
 
-        print(self.lets)
-
         # Limpieza de tokens_array.
         # Resultado deseado: {token: 'return X'}"}}
         for i in range(len(tokens_array)):
@@ -156,23 +154,139 @@ class YalParser():
             if elements[0] != "":
                 self.tokens[(elements[0]).strip()] = (elements[1]).strip()
 
-        print("\n",self.tokens,"\n")
+        #print("\n",self.tokens,"\n")
 
     def expand_lets(self):
         # expandir los let en el diccionario de lets
         for key in self.lets:
-            self.lets[key] = self.recursive_search(self.lets[key])
-           
 
+            charset_flag = False
+            define_flag = False
+
+            special_char = False
+
+            contenido_array = []
+
+            new_line = ""
+
+            for char in self.lets[key]:
+                if char == "[":
+                    charset_flag = True
+
+                elif char == "]":
+                    charset_flag = False
+
+                    updated_contenido_array = []
+
+                    for i in range(len(contenido_array)):
+
+                        if contenido_array[i] == "-":
+                            if i+1 < len(contenido_array):
+                                # generar la secuencia de caracteres de i-1 a 1+1
+                                for j in range(contenido_array[i-1], contenido_array[i+1]+1):
+                                    # convertir ascci a caracter y agregarlo a updated_contenido_array
+                                    updated_contenido_array.append(chr(j))
+
+                    if len(updated_contenido_array) == 0:
+                        for contenido in contenido_array:
+                            if chr(contenido) == '\t' or chr(contenido) == '\n' or chr(contenido) == '\r' or chr(contenido) == '\f' or chr(contenido) == ' ' or chr(contenido) in self.operators or chr(contenido) in self.define:
+                                updated_contenido_array.append("'"+str(contenido)+"'")
+
+                            else:
+                                updated_contenido_array.append(chr(contenido))
+
+                    # separar updated_contenido_array por "|" y pasar a string
+                    updated_contenido_array = "|".join(updated_contenido_array)
+                    new_line += "("+updated_contenido_array+")"
+
+                    contenido_array = []
+                    updated_contenido_array = []
+
+                elif not charset_flag and not define_flag:
+                    new_line += char
+
+                elif (char == "'" and charset_flag) or (char == '"' and charset_flag):
+                    define_flag = not define_flag
+
+                elif char == "-" and charset_flag and not define_flag:
+                    contenido_array.append("-")
+                
+                elif char == "-" and charset_flag and define_flag:
+                    contenido_array.append(ord("-"))
+
+                elif charset_flag and define_flag:
+                    if char == "\\":
+                        special_char = True
+                    elif special_char:
+                        if char == "n":
+                            contenido_array.append(ord("\n"))
+                        elif char == "t":
+                            contenido_array.append(ord("\t"))
+                        elif char == "r":
+                            contenido_array.append(ord("\r"))
+                        elif char == "f":
+                            contenido_array.append(ord("\f"))
+                        elif char == "s":
+                            contenido_array.append(ord(" "))
+                        special_char = False
+                    else:
+                        contenido_array.append(ord(char))
+
+            self.lets[key] = new_line
+
+        #print(self.lets)
+        
     def generate_regex(self):
-        tokens_actualizados = []
+        # remplaza en los lets las llaves por su contenido
+        updated_content = self.replace_keys(self.lets)
 
-        # recorrer tokens y generar expresiones regulares
+        # remplaza los tokens por su contenido y crea la regex
+        self.regex = []
+
         for key in self.tokens:
 
-            # revisar si key tambien es un let
-            if key in self.lets:
-                tokens_actualizados.append(self.lets[key])
+            if key in updated_content.keys():
+                self.regex.append(updated_content[key])
+
+            else:
+                key_without_apostrophe = key.replace('"', "")
+                key_without_apostrophe = key_without_apostrophe = key.replace("'", "").replace('"', "")
+
+                if len(key_without_apostrophe) > 1:
+                    self.regex.append("'"+key_without_apostrophe+"'")
+                elif key_without_apostrophe not in self.define and key_without_apostrophe not in self.operators:
+                    self.regex.append(key_without_apostrophe)
+                else:
+                    self.regex.append("'"+str(ord(key_without_apostrophe))+"'")
+
+        self.regex = "|".join(self.regex)
+
+        print(self.regex)
+
+    def replace_keys(self, patterns):
+        for k, v in patterns.items():
+            if isinstance(v, str):
+                for inner_k in patterns.keys():
+                    if inner_k in v:
+                        
+                        word_found = ""
+                        # recorrer v en busqueda de palabras.
+                        for char in v:
+
+                            if char == " " or char == "(" or char == ")" or char == "[" or char == "]" or char == "{" or char == "}" or char == "|" or char == "*" or char == "+" or char == "?" or char == "." or char == "^" or char == "$" or char == "\\" or char == "'" or char == '"':
+                                # si la palabra no esta vacia, agregarla a la lista
+                                if word_found != "":
+                                    if word_found in patterns.keys():
+                                        patterns[k] = patterns[k].replace(word_found, patterns[word_found])
+                                    word_found = ""
+                            # si el caracter no un espacio o simbolo, agregar la palabra a la lista
+                            else:
+                                word_found += char
+
+            elif isinstance(v, dict):
+                patterns[k] = self.replace_keys(v)
+
+        return patterns
 
         
             

@@ -61,7 +61,7 @@ class Arbol:
                 compund = not compund
 
                 if compund == False and compund_string != '':
-                    node = Nodo(compund_string)
+                    node = Nodo("'"+compund_string+"'")
                     stack.append(node)
                     compund_string = ''
 
@@ -91,16 +91,57 @@ class Arbol:
 
     def add_node(self, dot, node):
         # Añade nodo al grafo
-        dot.node(str(node.id), node.valor)
+        to_use = node.valor
 
-        # Añadir hijos al grafo
-        if node.izq is not None:
-            self.add_node(dot, node.izq)
-            dot.edge(str(node.id), str(node.izq.id))
+        contenido_to_use = ""
+        special_content = False
+        for char in to_use:
+            if char == "'":
+                contenido_to_use += ""
+                special_content = True
+            else:
+                contenido_to_use += char
+            
+        if special_content and contenido_to_use.isnumeric():
+            to_use = chr(int(contenido_to_use))
 
-        if node.der is not None:
-            self.add_node(dot, node.der)
-            dot.edge(str(node.id), str(node.der.id))
+        elif special_content and contenido_to_use.isalpha():
+            to_use = contenido_to_use
+
+        dot.node(str(node.id), to_use)
+
+        if to_use == '•':
+            izq = node.izq.id
+            der_izq = (node.der.izq.id if node.der.izq else None)
+
+            if izq == der_izq:
+                # Añadir hijos al grafo
+                if node.izq is not None:
+                    dot.edge(str(node.id), str(node.izq.id))
+
+                if node.der is not None:
+                    self.add_node(dot, node.der)
+                    dot.edge(str(node.id), str(node.der.id))
+
+            else:
+                # Añadir hijos al grafo
+                if node.izq is not None:
+                    self.add_node(dot, node.izq)
+                    dot.edge(str(node.id), str(node.izq.id))
+
+                if node.der is not None:
+                    self.add_node(dot, node.der)
+                    dot.edge(str(node.id), str(node.der.id))
+
+        else:
+            # Añadir hijos al grafo
+            if node.izq is not None:
+                self.add_node(dot, node.izq)
+                dot.edge(str(node.id), str(node.izq.id))
+
+            if node.der is not None:
+                self.add_node(dot, node.der)
+                dot.edge(str(node.id), str(node.der.id))
 
     def arbol_directo(self):
         arbol_nuevo = Nodo('•', self.root, Nodo('#'))

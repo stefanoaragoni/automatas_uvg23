@@ -18,7 +18,7 @@ def main():
 
     # ((ε|0)1*)* FIXME: No funciona directo
 
-    expresion = ["(a*|b*)c", "(b|b)*'abb'(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)","b*ab?", "b+abc+", "ab*ab*", "0(0|1)*0", "((ε|0)1*)*", "(0|1)*0(0|1)(0|1)", "(00)*(11)*", "(0|1)1*(0|1)", "0?(1|ε)?0*", "((1?)*)*", "(01)*(10)*"]
+    expresion = ["(2|1|5)+","(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)","b*ab?", "b+abc+", "ab*ab*", "0(0|1)*0", "((ε|0)1*)*", "(0|1)*0(0|1)(0|1)", "(00)*(11)*", "(0|1)1*(0|1)", "0?(1|ε)?0*", "((1?)*)*", "(01)*(10)*"]
     prueba = ['a', 'baa', 'baaa','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb', '1', 'babcc']
     yal_file = ["slr-1.yal", "slr-2.yal", "slr-3.yal", "slr-4.yal"]
     opcion = 0
@@ -34,7 +34,11 @@ def main():
             opcion = int(input("\nIngrese el número del archivo Yalex a evaluar: "))
             if opcion > 0 and opcion <= len(yal_file):
                 yal = YalParser("./yalex/"+yal_file[opcion-1])
-                #yal.print_tree()
+                
+                postfix_expr = Postfix(yal.regex)
+
+                tree = Arbol(postfix_expr.postfix)
+                tree.print_tree("Yalex Tree")
 
                 opcion = 0
                 input("\nPresione ENTER para continuar...")
