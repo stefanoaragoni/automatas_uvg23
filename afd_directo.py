@@ -41,7 +41,7 @@ class AFD_Directo(Automata):
     def get_simbolos(self, tree_node):
         simbolos = Set()
         if tree_node is not None:
-            if tree_node.valor == '.' or tree_node.valor == '|' or tree_node.valor == '*':
+            if tree_node.valor == '•' or tree_node.valor == '|' or tree_node.valor == '*':
                 simbolos = simbolos.Union(self.get_simbolos(tree_node.izq))
                 simbolos = simbolos.Union(self.get_simbolos(tree_node.der))
             else:

@@ -7,8 +7,8 @@
 class Postfix:
     # Constructor
     def __init__(self, regex):
-        self.operators = ['|', '.', '*', '+', '?']
-        self.operator_precedence = {'|': 1, '.': 2, '*': 3, '+': 3, '?': 3}
+        self.operators = ['|', '•', '*', '+', '?']
+        self.operator_precedence = {'|': 1, '•': 2, '*': 3, '+': 3, '?': 3}
         self.regex = regex
         self.error = False
 
@@ -53,12 +53,21 @@ class Postfix:
     # Agrega un punto de concatenación entre caracteres
     def add_concatenation(self):
         new_regex = ''
+
+        multiple = 1
+
         for i, char in enumerate(self.regex):
             new_regex += char
             if i+1 < len(self.regex):
-                if (char not in ['(', '|'] and self.regex[i+1] not in [')', '|', '*', '+', '?']) or (char == ')' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '*' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '+' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '?' and self.regex[i+1] not in ['|', '*', '+', '?', ')']):
-                    if self.regex[i+1] != ')' or char != '(':
-                        new_regex += '.'
+                if "'" in char:
+                    multiple = multiple * -1
+
+                if multiple == 1:
+                    if (char not in ['(', '|'] and self.regex[i+1] not in [')', '|', '*', '+', '?']) or (char == ')' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '*' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '+' and self.regex[i+1] not in ['|', '*', '+', '?', ')']) or (char == '?' and self.regex[i+1] not in ['|', '*', '+', '?', ')']):
+                        if self.regex[i+1] != ')' or char != '(':
+                            new_regex += '•'
+
+                
         return new_regex
 
     # Verifica que la expresión regular infix sea válida; si no lo es, lanza una excepción
@@ -72,7 +81,7 @@ class Postfix:
             self.error = True
             return
 
-        simbolos_binarios = ['|', '.']
+        simbolos_binarios = ['|', '•']
         simbolos_unarios = ['*', '+', '?']
         for i, char in enumerate(self.regex):
             if i+1 < len(self.regex):
@@ -82,7 +91,7 @@ class Postfix:
                     break
                 
                 if char in simbolos_binarios and self.regex[i+1] in simbolos_binarios:
-                    print('La expresión regular infix no puede tener dos operadores seguidos como ".", "|".')
+                    print('La expresión regular infix no puede tener dos operadores seguidos como •, "|".')
                     self.error = True
                     break
                 
@@ -106,8 +115,8 @@ class Postfix:
                     self.error = True
                     break
 
-        if self.regex[-1] in ['|', '.']:
-            print('La expresión regular infix no puede terminar con un operador como ".", "|".')
+        if self.regex[-1] in ['|', '•']:
+            print('La expresión regular infix no puede terminar con un operador como •, "|".')
             self.error = True
             
         if self.regex.count('(') != self.regex.count(')'):

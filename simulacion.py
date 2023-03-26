@@ -18,12 +18,14 @@ class Simulacion:
         if (estado, cadena) in self.visited:
             return
         self.visited.add((estado, cadena))
-        
-        primer_simbolo = cadena[0] if cadena else ''
 
         for transicion in self.automata.transiciones:
+
+            largo_compuesto = len(transicion.el_simbolo.c_id)
+            primer_simbolo = cadena[0:largo_compuesto] if cadena else ''
+
             if transicion.estado_origen == estado and transicion.el_simbolo.c_id == primer_simbolo:
-                self.simularAFN(transicion.estado_destino, cadena[1:])
+                self.simularAFN(transicion.estado_destino, cadena[largo_compuesto:])
 
             if transicion.estado_origen == estado and transicion.el_simbolo.c_id == "ε":
                 self.simularAFN(transicion.estado_destino, cadena)
@@ -38,11 +40,13 @@ class Simulacion:
             return
         self.visited.add((estado, cadena))
         
-        primer_simbolo = cadena[0] if cadena else ''
-
         for transicion in self.automata.transiciones:
+
+            largo_compuesto = len(transicion.el_simbolo.c_id)
+            primer_simbolo = cadena[0:largo_compuesto] if cadena else ''
+
             if transicion.estado_origen == estado and transicion.el_simbolo.c_id == primer_simbolo:
-                self.simularAFD(transicion.estado_destino, cadena[1:])
+                self.simularAFN(transicion.estado_destino, cadena[largo_compuesto:])
 
         if len(cadena) == 0:
             if estado in self.automata.EstadosFinales.Elementos:
