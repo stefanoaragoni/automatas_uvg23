@@ -185,7 +185,8 @@ class YalParser():
                                 # generar la secuencia de caracteres de i-1 a 1+1
                                 for j in range(contenido_array[i-1], contenido_array[i+1]+1):
                                     # convertir ascci a caracter y agregarlo a updated_contenido_array
-                                    updated_contenido_array.append(chr(j))
+                                    #updated_contenido_array.append(chr(j))
+                                    updated_contenido_array.append("'"+str(j)+"'")
 
                     if len(updated_contenido_array) == 0:
                         for contenido in contenido_array:
@@ -193,7 +194,8 @@ class YalParser():
                                 updated_contenido_array.append("'"+str(contenido)+"'")
 
                             else:
-                                updated_contenido_array.append(chr(contenido))
+                                #updated_contenido_array.append(chr(contenido))
+                                updated_contenido_array.append("'"+str(contenido)+"'")
 
                     # separar updated_contenido_array por "|" y pasar a string
                     updated_contenido_array = "|".join(updated_contenido_array)
@@ -254,8 +256,8 @@ class YalParser():
 
                 if len(key_without_apostrophe) > 1:
                     self.regex.append("'"+key_without_apostrophe+"'")
-                elif key_without_apostrophe not in self.define and key_without_apostrophe not in self.operators:
-                    self.regex.append(key_without_apostrophe)
+                #elif key_without_apostrophe not in self.define and key_without_apostrophe not in self.operators:
+                #    self.regex.append(key_without_apostrophe)
                 else:
                     self.regex.append("'"+str(ord(key_without_apostrophe))+"'")
 
