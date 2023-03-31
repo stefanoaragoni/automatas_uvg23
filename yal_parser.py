@@ -255,9 +255,16 @@ class YalParser():
                 key_without_apostrophe = key_without_apostrophe = key.replace("'", "").replace('"', "")
 
                 if len(key_without_apostrophe) > 1:
-                    self.regex.append("'"+key_without_apostrophe+"'")
-                #elif key_without_apostrophe not in self.define and key_without_apostrophe not in self.operators:
-                #    self.regex.append(key_without_apostrophe)
+                    
+                    temporal_regex = []
+
+                    for char in key_without_apostrophe:
+                        temporal_regex.append("'"+str(ord(char))+"'")
+
+                    temporal_regex = "("+("".join(temporal_regex))+")"
+
+                    self.regex.append(temporal_regex)
+
                 else:
                     self.regex.append("'"+str(ord(key_without_apostrophe))+"'")
 
@@ -281,6 +288,7 @@ class YalParser():
                                     if word_found in patterns.keys():
                                         patterns[k] = patterns[k].replace(word_found, patterns[word_found])
                                     word_found = ""
+                            
                             # si el caracter no un espacio o simbolo, agregar la palabra a la lista
                             else:
                                 word_found += char
