@@ -114,67 +114,83 @@ class YalParser():
                     else:
                         new_line += char
 
-            new_line = new_line.strip()
+            # verifica que comentario no este abierto
+            if comentario != 0:
+                print("\nError: comentario no cerrado. Saltando linea: '", current_line)
+            else:
+                new_line = new_line.strip()
 
-            elements = ["",""]
+                elements = ["",""]
 
-            temp_word = ""
-            return_flag = False
+                temp_word = ""
+                return_flag = False
 
-            # separa contenido en nombre y contenido
-            for char2 in new_line:
+                # separa contenido en nombre y contenido
+                for char2 in new_line:
 
-                if temp_word == "return":
-                    temp_word = ""
-                    return_flag = True
-                    pass
-                
-                elif char2 == " " and not return_flag:
-                    if temp_word != "":
-                        elements[0] = temp_word
+                    if temp_word == "return":
                         temp_word = ""
-    
-                elif char2 == "{":
-                    pass
+                        return_flag = True
+                        pass
+                    
+                    elif char2 == " " and not return_flag:
+                        if temp_word != "":
+                            elements[0] = temp_word
+                            temp_word = ""
+        
+                    elif char2 == "{":
+                        pass
 
-                elif char2 == "}" and return_flag:
-                    elements[1] = temp_word
-                    temp_word = ""
+                    elif char2 == "}" and return_flag:
+                        elements[1] = temp_word
+                        temp_word = ""
 
-                else:
-                    temp_word += char2
+                    else:
+                        temp_word += char2
 
-            if temp_word != "":
-                if elements[0] == "":
-                    elements[0] = temp_word
-                else:
-                    elements[1] += temp_word
+                if temp_word != "":
+                    if elements[0] == "":
+                        elements[0] = temp_word
+                    else:
+                        elements[1] += temp_word
 
-            # almacena en diccionario
-            if elements[0] != "":
-                self.tokens[(elements[0]).strip()] = (elements[1]).strip()
+                # almacena en diccionario
+                if elements[0] != "":
+                    self.tokens[(elements[0]).strip()] = (elements[1]).strip()
 
-        #print("\n",self.tokens,"\n")
+            #print("\n",self.tokens,"\n")
 
     def expand_lets(self):
         # expandir los let en el diccionario de lets
+        error_ = []
+
         for key in self.lets:
 
             charset_flag = False
             define_flag = False
-
             special_char = False
-
             contenido_array = []
 
             new_line = ""
 
-            for char in self.lets[key]:
+            for char_id, char in enumerate(self.lets[key]):
+                # elimina linea en caso no se tenga el charset completo
+                if charset_flag and char_id == len(self.lets[key])-1 and char != "]":
+                    print("Error: '[' sin ']'. Agregando ']' en",key,": ", self.lets[key])
+                    char = "]"
+
                 if char == "[":
                     charset_flag = True
 
                 elif char == "]":
-                    charset_flag = False
+                    if charset_flag:
+                        charset_flag = False
+                    
+                    # En caso haya ] pero nunca haya [
+                    else:
+                        print("\nError: ']' sin '['. Saltando",key,": ", self.lets[key])
+                        error_.append(key)
+                        break
 
                     updated_contenido_array = []
 
@@ -204,11 +220,17 @@ class YalParser():
                     contenido_array = []
                     updated_contenido_array = []
 
-                elif not charset_flag and not define_flag:
-                    new_line += char
-
-                elif (char == "'" and charset_flag) or (char == '"' and charset_flag):
+                elif (char == "'") or (char == '"'):
                     define_flag = not define_flag
+
+                elif not charset_flag and define_flag:
+                    new_line += "'"+str(ord(char))+"'"
+
+                elif not charset_flag and not define_flag:
+                    if not char.isalpha() and not char.isnumeric() and char not in self.charset and char not in self.define and char not in self.operators:
+                        new_line += "'"+str(ord(char))+"'"
+                    else:
+                        new_line += char
 
                 elif char == "-" and charset_flag and not define_flag:
                     contenido_array.append("-")
@@ -230,11 +252,21 @@ class YalParser():
                             contenido_array.append(ord("\f"))
                         elif char == "s":
                             contenido_array.append(ord(" "))
+                        else:
+                            print("\nError: Se ingresó secuencia de escape invalida. Saltando linea: '", self.lets[key])
                         special_char = False
                     else:
                         contenido_array.append(ord(char))
 
-            self.lets[key] = new_line
+            correcto_or_error = self.verify_regex(new_line)
+
+            if correcto_or_error:
+                error_.append(key)
+            else:
+                self.lets[key] = new_line
+
+        for element in error_:
+            self.lets.pop(element)
 
         #print(self.lets)
         
@@ -251,55 +283,125 @@ class YalParser():
                 self.regex.append(updated_content[key])
 
             else:
-                key_without_apostrophe = key.replace('"', "")
-                key_without_apostrophe = key_without_apostrophe = key.replace("'", "").replace('"', "")
+                if "'" in key or '"' in key:
+                    key_without_apostrophe = key.replace('"', "")
+                    key_without_apostrophe = key_without_apostrophe = key.replace("'", "").replace('"', "")
 
-                if len(key_without_apostrophe) > 1:
-                    
-                    temporal_regex = []
+                    if len(key_without_apostrophe) > 1:
+                        
+                        temporal_regex = []
 
-                    for char in key_without_apostrophe:
-                        temporal_regex.append("'"+str(ord(char))+"'")
+                        for char in key_without_apostrophe:
+                            temporal_regex.append("'"+str(ord(char))+"'")
 
-                    temporal_regex = "("+("".join(temporal_regex))+")"
+                        temporal_regex = "("+("".join(temporal_regex))+")"
 
-                    self.regex.append(temporal_regex)
+                        self.regex.append(temporal_regex)
+
+                    else:
+                        self.regex.append("'"+str(ord(key_without_apostrophe))+"'")
 
                 else:
-                    self.regex.append("'"+str(ord(key_without_apostrophe))+"'")
+                    print("\nError: Token ID ('"+key+"') no encontrado den el diccionario de 'let'. Saltando linea. \n")
 
         self.regex = "|".join(self.regex)
 
-        print(self.regex)
-
     def replace_keys(self, patterns):
+        to_delete = []
+
         for k, v in patterns.items():
-            if isinstance(v, str):
-                for inner_k in patterns.keys():
-                    if inner_k in v:
-                        
+
+            word_found = ""
+            define_flag = False
+            new_value = ""
+
+            # recorrer v en busqueda de palabras.
+            for char in v:
+
+                # si el char es una letra, agregarlo a la palabra de lookup
+                if char.isalpha() and not define_flag:
+                    word_found += char
+
+                # si el char no es una letra, agregar la palabra a la lista
+                else:
+                    # si el char es un define, cambiar bandera
+                    if char == "'" or char == '"':
+                        define_flag = not define_flag
+
+                    if word_found != "" and word_found in patterns.keys():
+                        new_value += patterns[word_found]
+                        new_value += char
                         word_found = ""
-                        # recorrer v en busqueda de palabras.
-                        for char in v:
 
-                            if char == " " or char == "(" or char == ")" or char == "[" or char == "]" or char == "{" or char == "}" or char == "|" or char == "*" or char == "+" or char == "?" or char == "." or char == "^" or char == "$" or char == "\\" or char == "'" or char == '"':
-                                # si la palabra no esta vacia, agregarla a la lista
-                                if word_found != "":
-                                    if word_found in patterns.keys():
-                                        patterns[k] = patterns[k].replace(word_found, patterns[word_found])
-                                    word_found = ""
-                            
-                            # si el caracter no un espacio o simbolo, agregar la palabra a la lista
-                            else:
-                                word_found += char
+                    elif word_found != "" and word_found not in patterns.keys():
+                        print("\nError: Keyword ('"+word_found+"') no encontrada en el diccionario de 'let'. Saltando linea: ",k,":", v)
+                        to_delete.append(k)
+                        new_value = ""
+                        break
 
-            elif isinstance(v, dict):
-                patterns[k] = self.replace_keys(v)
+                    else:
+                        new_value += char
+                        word_found = ""
+
+            patterns[k] = new_value
+        
+        for element in to_delete:
+            patterns.pop(element)
 
         return patterns
 
-        
+    # Verifica que la expresión regular infix sea válida; si no lo es, lanza una excepción
+    def verify_regex(self, regex):
+        error = False # bandera para indicar si hubo un error
+
+        if regex == '':
+            print('\nError: La linea no puede estar vacía.\n')
+            error = True
+            return error
+        if regex[0] in self.operators:
+            print('\nError: El let no puede iniciar con un operador: ',regex)
+            error = True
+            return error
+
+        simbolos_binarios = ['|', '•']
+        simbolos_unarios = ['*', '+', '?']
+        for i, char in enumerate(regex):
+            if i+1 < len(regex):
+                
+                if char in simbolos_binarios and regex[i+1] in simbolos_binarios:
+                    print('\nError: El let no puede tener dos operadores seguidos como "|": ',regex)
+                    error = True
+                    break
+                
+                if char in simbolos_binarios and regex[i+1] == ')':
+                    print('\nError: El let no puede tener un operador binario seguido de un paréntesis de cierre: ',regex)
+                    error = True
+                    break
+
+                if (char == '(' and regex[i+1] in simbolos_unarios) or (char == '(' and regex[i+1] in simbolos_binarios):
+                    print('\nError: El let no puede tener un paréntesis de apertura seguido de un operador: ',regex)
+                    error = True
+                    break
+
+                if (char == '(' and regex[i+1] == ')'):
+                    print('\nError: El let no puede tener un paréntesis de apertura seguido de un paréntesis de cierre.: ',regex)
+                    error = True
+                    break
+
+                if char in simbolos_binarios and regex[i+1] in simbolos_unarios:
+                    print('\nError: El let no puede tener un operador binario seguido de un operador unario como "*", "+", "?": ',regex)
+                    error = True
+                    break
+
+        if regex[-1] in ['|']:
+            print('\nError: El let no puede terminar con un operador como "|": ',regex)
+            error = True
             
+        if regex.count('(') != regex.count(')'):
+            print('\nError: Los paréntesis no están balanceados: ',regex)
+            error = True
+
+        return error
 
             
 
