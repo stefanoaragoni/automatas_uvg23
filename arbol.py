@@ -18,8 +18,8 @@ from set import Set
 class Arbol:
     # Constructor
     def __init__(self, regex, root=None):
-        self.operators = ['|', '.', '*', '+', '?']
-        self.operator_precedence = {'|': 1, '.': 2, '*': 3, '+': 3, '?': 3}
+        self.operators = ['|', '•', '*', '+', '?']
+        self.operator_precedence = {'|': 1, '•': 2, '*': 3, '+': 3, '?': 3}
         self.regex = regex
 
         if root:
@@ -30,6 +30,10 @@ class Arbol:
     # Construye el árbol de expresiones regulares
     def construct_tree(self):
         stack = []
+        compund = False
+        compund_string = ''
+
+        node = None
 
         # Recorre la expresión regular en postfix
         for char in self.regex:
@@ -38,23 +42,36 @@ class Arbol:
                     right = stack.pop()
                     left = stack.pop()
                     node = Nodo('|', left, right)
-                elif char == '.':
+                elif char == '•':
                     right = stack.pop()
                     left = stack.pop()
-                    node = Nodo('.', left, right)
+                    node = Nodo('•', left, right)
                 elif char == '*':
                     child = stack.pop()
                     node = Nodo('*', child)
                 elif char == '+':
                     child = stack.pop()
-                    node = Nodo('.', child, Nodo('*' , child))
+                    node = Nodo('•', child, Nodo('*' , child))
                 elif char == '?':
                     child = stack.pop()
                     node = Nodo('|', child, Nodo('ε'))
                 stack.append(node)
+
+            elif char == "'":
+                compund = not compund
+
+                if compund == False and compund_string != '':
+                    node = Nodo("'"+compund_string+"'")
+                    stack.append(node)
+                    compund_string = ''
+
             else:
-                node = Nodo(char)
-                stack.append(node)
+                if compund:
+                    compund_string += char
+
+                else:
+                    node = Nodo(char)
+                    stack.append(node)
             
         # Retorna la raíz del árbol
         return stack.pop()
@@ -74,19 +91,60 @@ class Arbol:
 
     def add_node(self, dot, node):
         # Añade nodo al grafo
-        dot.node(str(node.id), node.valor)
+        to_use = node.valor
 
-        # Añadir hijos al grafo
-        if node.izq is not None:
-            self.add_node(dot, node.izq)
-            dot.edge(str(node.id), str(node.izq.id))
+        contenido_to_use = ""
+        special_content = False
+        for char in to_use:
+            if char == "'":
+                contenido_to_use += ""
+                special_content = True
+            else:
+                contenido_to_use += char
+            
+        if special_content and contenido_to_use.isnumeric():
+            to_use = chr(int(contenido_to_use))
 
-        if node.der is not None:
-            self.add_node(dot, node.der)
-            dot.edge(str(node.id), str(node.der.id))
+        elif special_content and contenido_to_use.isalpha():
+            to_use = contenido_to_use
+
+        dot.node(str(node.id), to_use)
+
+        if to_use == '•':
+            izq = node.izq.id
+            der_izq = (node.der.izq.id if node.der.izq else None)
+
+            if izq == der_izq:
+                # Añadir hijos al grafo
+                if node.izq is not None:
+                    dot.edge(str(node.id), str(node.izq.id))
+
+                if node.der is not None:
+                    self.add_node(dot, node.der)
+                    dot.edge(str(node.id), str(node.der.id))
+
+            else:
+                # Añadir hijos al grafo
+                if node.izq is not None:
+                    self.add_node(dot, node.izq)
+                    dot.edge(str(node.id), str(node.izq.id))
+
+                if node.der is not None:
+                    self.add_node(dot, node.der)
+                    dot.edge(str(node.id), str(node.der.id))
+
+        else:
+            # Añadir hijos al grafo
+            if node.izq is not None:
+                self.add_node(dot, node.izq)
+                dot.edge(str(node.id), str(node.izq.id))
+
+            if node.der is not None:
+                self.add_node(dot, node.der)
+                dot.edge(str(node.id), str(node.der.id))
 
     def arbol_directo(self):
-        arbol_nuevo = Nodo('.', self.root, Nodo('#'))
+        arbol_nuevo = Nodo('•', self.root, Nodo('#'))
         return Arbol(self.regex, arbol_nuevo)
 
 '''
@@ -99,7 +157,14 @@ class Nodo:
         self.izq = izq
         self.der = der
 
-        ascii = ord(valor)
+        ascii = 0
+
+        # if valor is longer than 1, it is a compound character
+        if len(valor) > 1:
+            ascii = valor
+        else:
+            ascii = ord(valor)
+
         self.simbolo = Simbolo(ascii, valor)
 
         self.root = False
@@ -110,7 +175,7 @@ class Nodo:
         self.lastpos = Set()
         self.followpos = Set()
 
-        if (valor != '|' and valor != '.' and valor != '*' and valor != '+' and valor != '?'):
+        if (valor != '|' and valor != '•' and valor != '*' and valor != '+' and valor != '?'):
             self.firstpos.AddItem(self.id)
             self.lastpos.AddItem(self.id)           
             
@@ -162,7 +227,7 @@ class Nodo:
             node.nullable = izq or der
             return node.nullable
         
-        elif node.valor == '.':
+        elif node.valor == '•':
             izq = self.nullable_calc(node.izq)
             der = self.nullable_calc(node.der)
             node.nullable = izq and der
@@ -186,7 +251,7 @@ class Nodo:
             node.firstpos = izq.Union(der)
             return node.firstpos
         
-        elif node.valor == '.':
+        elif node.valor == '•':
             izq = self.firstpos_calc(node.izq)
             der = self.firstpos_calc(node.der)
 
@@ -219,7 +284,7 @@ class Nodo:
             node.lastpos = izq.Union(der)
             return node.lastpos
         
-        elif node.valor == '.':
+        elif node.valor == '•':
             izq = self.lastpos_calc(node.izq)
             der = self.lastpos_calc(node.der)
 
@@ -246,7 +311,7 @@ class Nodo:
     def followpos_calc(self, root):
         if root.izq is not None:
 
-            if root.valor == '.':
+            if root.valor == '•':
                 self.followpos_calc(root.der)
                 self.followpos_calc(root.izq)
 
