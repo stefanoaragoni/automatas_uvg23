@@ -32,6 +32,8 @@ class YalParser():
         # abrir archivo yal
         with open(self.file, "r") as file:
             rules = False
+            token_completo = ""
+            start_end_token = [0,0]
 
             # revisar a que corresponde cada linea
             for line in file:
@@ -42,7 +44,25 @@ class YalParser():
 
                 # let = | se agrega a let_array
                 elif line.startswith("let"):
-                    let_array.append((line[4:]).strip())
+                    contenido_to_store = ""
+                    let_name = ""
+                    first_space = False
+
+                    for i, char in enumerate(line):
+                        if char == " " and not first_space:
+                            first_space = True
+
+                        if first_space:
+                            contenido_to_store += char
+                        else:
+                            let_name += char
+
+                    if let_name.upper() == "LET":
+                        pass
+                    else:
+                        print(f"\nDeteccion Error: Se encontro un error en la declaracion de let: {line}.")
+
+                    let_array.append((contenido_to_store).strip())
                 
                 # rule = | se activa rules
                 elif line.startswith("rule"):
@@ -50,7 +70,31 @@ class YalParser():
 
                 # tokens = | se agrega a tokens_array
                 elif rules:
-                    tokens_array.append(line)
+
+                    if "{" not in line and start_end_token[0] == 0 and start_end_token[1] == 0:
+                        tokens_array.append(line.strip())
+
+                    else:
+                        for i, char in enumerate(line.strip()):
+                            if i == 0:
+                                token_completo += " "
+
+                            if char == "}" or char == "{":
+                                start_end_token[0] += 1
+                                start_end_token[1] += 1
+
+                                if start_end_token[0] == 2 and start_end_token[1] == 2:
+                                    start_end_token[0] = 0
+
+                            if i == len(line)-1 and start_end_token[0] == 0 and start_end_token[1] == 2:
+                                token_completo += char
+                                tokens_array.append(token_completo)
+                                token_completo = ""
+                                start_end_token[0] = 0
+                                start_end_token[1] = 0
+                            
+                            else:
+                                token_completo += char
 
         
         # Limpieza de let_array. 
@@ -80,30 +124,51 @@ class YalParser():
             new_line[0] = new_line[0].strip()
             new_line[1] = new_line[1].strip()
 
+            comillas = 0
+            contenido_sin_espacios = ""
+
+            for char in new_line[1]:
+                if char == "'" or char == '"':
+                    comillas = comillas + 1
+                    if comillas == 2:
+                        comillas = 0
+                
+                if char == " " and comillas == 0:
+                    pass
+                else:
+                    contenido_sin_espacios += char
+
             # almacena en diccionario
-            self.lets[new_line[0]] = new_line[1]
+            self.lets[new_line[0]] = contenido_sin_espacios
 
         # Limpieza de tokens_array.
         # Resultado deseado: {token: 'return X'}"}}
         for i in range(len(tokens_array)):
-            current_line = tokens_array[i]
+            current_line = tokens_array[i].strip()
             new_line = ""
 
+            comillas = 0
             comentario = 0
+
             for i, char in enumerate(current_line):
+
+                if char == "'" or char == '"':
+                    comillas = comillas + 1
+                    if comillas == 2:
+                        comillas = 0
                 
                 # elimina comentarios
                 if i+1 < len(current_line):
-                    if char == "(" and current_line[i+1] == "*":
+                    if char == "(" and current_line[i+1] == "*" and comillas == 0:
                         comentario = 2
 
-                    elif char == "*" and current_line[i+1] == ")":
+                    elif char == "*" and current_line[i+1] == ")" and comillas == 0:
                         comentario = comentario - 1
 
                 # elimina comentarios
                 comment_ended = False
                 if i-1 >= 0:
-                    if char == ")" and current_line[i-1] == "*":
+                    if char == ")" and current_line[i-1] == "*" and  comillas == 0:
                         comentario = comentario - 1
                         comment_ended = True
 
@@ -127,18 +192,15 @@ class YalParser():
 
                 # separa contenido en nombre y contenido
                 for char2 in new_line:
-
-                    if temp_word == "return":
-                        temp_word = ""
-                        return_flag = True
-                        pass
                     
-                    elif char2 == " " and not return_flag:
+                    if char2 == " " and not return_flag:
                         if temp_word != "":
                             elements[0] = temp_word
                             temp_word = ""
         
                     elif char2 == "{":
+                        temp_word = ""
+                        return_flag = True
                         pass
 
                     elif char2 == "}" and return_flag:

@@ -20,7 +20,7 @@ def main():
 
     expresion = ["(2|123|5)+","(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)","b*ab?", "b+abc+", "ab*ab*", "0(0|1)*0", "((ε|0)1*)*", "(0|1)*0(0|1)(0|1)", "(00)*(11)*", "(0|1)1*(0|1)", "0?(1|ε)?0*", "((1?)*)*", "(01)*(10)*"]
     prueba = ['a', 'baa', 'baaa','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb', '1', 'babcc']
-    yal_file = ["slr-1.yal", "slr-2.yal", "slr-3.yal", "slr-4.yal"]
+    yal_file = ["slr-0.yal", "slr-1.yal", "slr-2.yal", "slr-3.yal", "slr-4.yal"]
     opcion = 0
 
     while True:
