@@ -39,11 +39,18 @@ class YalParser():
             for line in file:
                 line = line.strip()
 
+                starting_with = ""
+                for char in line:
+                    if char == " ":
+                        break
+                    else:
+                        starting_with += char
+
                 if line == "":
                     pass
 
                 # let = | se agrega a let_array
-                elif line.startswith("let"):
+                elif starting_with.startswith("let"):
                     contenido_to_store = ""
                     let_name = ""
                     first_space = False
@@ -65,7 +72,11 @@ class YalParser():
                     let_array.append((contenido_to_store).strip())
                 
                 # rule = | se activa rules
-                elif line.startswith("rule"):
+                elif starting_with.startswith("rule"):
+                    if starting_with.upper() == "RULE":
+                        pass
+                    else:
+                        print(f"\nDeteccion Error: Se encontro un error en la declaracion de rule: {line}.")
                     rules = True
 
                 # tokens = | se agrega a tokens_array
@@ -340,9 +351,11 @@ class YalParser():
         self.regex = []
 
         for key in self.tokens:
+            value = "'#"+self.tokens[key]+"'"
 
             if key in updated_content.keys():
-                self.regex.append(updated_content[key])
+                temporal_regex = "(("+updated_content[key]+")"+value+")"
+                self.regex.append(temporal_regex)
 
             else:
                 if "'" in key or '"' in key:
@@ -357,11 +370,13 @@ class YalParser():
                             temporal_regex.append("'"+str(ord(char))+"'")
 
                         temporal_regex = "("+("".join(temporal_regex))+")"
+                        temporal_regex = "("+temporal_regex+value+")"
 
                         self.regex.append(temporal_regex)
 
                     else:
-                        self.regex.append("'"+str(ord(key_without_apostrophe))+"'")
+                        temporal_regex = "(("+"'"+str(ord(key_without_apostrophe))+"'"+")"+value+")"
+                        self.regex.append(temporal_regex)
 
                 else:
                     print("\nError: Token ID ('"+key+"') no encontrado den el diccionario de 'let'. Saltando linea. \n")

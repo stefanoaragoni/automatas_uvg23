@@ -12,7 +12,7 @@ let id = letter(letter|str|digit)*
 let number = digits(.digits)?('E'['+''-']?digits)?
 
 rule tokens = 
-    ws
+    ws        { return WHITESPACE }
   | id        { return ID }               (* Cambie por una acción válida, que devuelva el token *)
   | number    { return NUMBER }
   | ';'       { return SEMICOLON }

@@ -24,115 +24,55 @@ def main():
     opcion = 0
 
     while True:
-        modo = int(input("\n1. Yalex Tree \n2. NFA, DFA, Minimization, Simulation \nIngrese el modo de ejecución: "))
+        print("\nArchivos Yalex:")
+        for i in range(len(yal_file)):
+            print(f"\t{i+1}. {yal_file[i]}")
 
-        if modo == 1:
-            print("\nArchivos Yalex:")
-            for i in range(len(yal_file)):
-                print(f"\t{i+1}. {yal_file[i]}")
+        opcion = int(input("\nIngrese el número del archivo Yalex a evaluar: "))
+        print("\n")
+        
+        if opcion > 0 and opcion <= len(yal_file):
+            yal = YalParser("./yalex/"+yal_file[opcion-1])
+            postfix_expr = Postfix(yal.regex)
 
-            opcion = int(input("\nIngrese el número del archivo Yalex a evaluar: "))
-            print("\n")
-            
-            if opcion > 0 and opcion <= len(yal_file):
-                yal = YalParser("./yalex/"+yal_file[opcion-1])
-                postfix_expr = Postfix(yal.regex)
+            if postfix_expr.error:
+                print("\nExpresión Regular inválida!") 
+                opcion = 0
+                input("\nPresione ENTER para continuar...")
 
-                if postfix_expr.error:
-                    print("\nExpresión Regular inválida!") 
-                    opcion = 0
-                    input("\nPresione ENTER para continuar...")
-
-                else:
-                    print("-----\nExpresión Regular (infix):\n",postfix_expr.regex)
-                    print("-----\nExpresión Regular (postfix):\n",postfix_expr.postfix)
-
-                    tree = Arbol(postfix_expr.postfix)
-                    tree.print_tree("Yalex Tree")
-
-                    opcion = 0
-                    input("\nPresione ENTER para continuar...")
-
-        elif modo == 2:
-            print("\nExpresiones Regulares:")
-            for i in range(len(expresion)):
-                print(f"\t{i+1}. {expresion[i]}")
-
-            opcion = int(input("\nIngrese el número de la expresión regular a evaluar: "))
-
-            if opcion > 0 and opcion <= len(expresion):
-                postfix_expr = Postfix(expresion[opcion-1])
-
-                if postfix_expr.error:
-                    print("\nExpresión Regular inválida!") 
-                    opcion = 0
-                    input("\nPresione ENTER para continuar...")
-
-                else:
-                    print("\nExpresión Regular (infix):",postfix_expr.regex.replace("'",""))
-                    print("\nExpresión Regular (postfix):",postfix_expr.postfix.replace("'",""))
-
-                    tree = Arbol(postfix_expr.postfix)
-                    tree.print_tree(postfix_expr.regex.replace("'",""))
-
-                    afn = AFN(tree.root)
-                    Graph(afn, postfix_expr.regex.replace("'",""), "AFN")
-
-                    afd_subconjuntos = AFD_Subconjuntos(afn)
-                    Graph(afd_subconjuntos, postfix_expr.regex.replace("'",""), "AFD_Subconjuntos")
-
-                    afd_directo = AFD_Directo(tree)
-                    Graph(afd_directo, postfix_expr.regex.replace("'",""), "AFD_Directo")
-
-                    afd_minimizacion_subconjuntos = AFD_Minimizacion(afd_subconjuntos)
-                    Graph(afd_minimizacion_subconjuntos, postfix_expr.regex.replace("'",""), "AFD_Subconjuntos_Minimizado")
-
-                    afd_minimizacion_directo = AFD_Minimizacion(afd_directo)
-                    Graph(afd_minimizacion_directo, postfix_expr.regex.replace("'",""), "AFD_Directo_Minimizado")
-
-                    print("\nSimulacion:")
-                    resultados_simulacion = {}
-
-                    for test in prueba:
-                        resultados_simulacion[test] = [0,0]
-
-                        if Simulacion(afn, test, 'AFN').resultado == True:
-                            resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
-                        else:
-                            resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
-
-                        if Simulacion(afd_subconjuntos, test, 'AFD').resultado == True:
-                            resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
-                        else:
-                            resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
-
-                        if Simulacion(afd_directo, test, 'AFD').resultado == True:
-                            resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
-                        else:
-                            resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
-                        
-                        if Simulacion(afd_minimizacion_subconjuntos, test, 'AFD').resultado == True:
-                            resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
-                        else:
-                            resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
-
-                        if Simulacion(afd_minimizacion_directo, test, 'AFD').resultado == True:
-                            resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
-                        else:
-                            resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
-                        
-
-                    table = PrettyTable()
-                    table.field_names = ["Test", "Sí", "No"]
-                    print(expresion[opcion-1].replace("'",""))
-                    for test, results in resultados_simulacion.items():
-                        table.add_row([test, results[0], results[1]])
-                    print(table)
-
-                    opcion = 0
-                    input("\nPresione ENTER para continuar...")
             else:
-                print("\nOpción inválida.")
+                print("-----\nExpresión Regular (infix):\n",postfix_expr.regex)
+                print("-----\nExpresión Regular (postfix):\n",postfix_expr.postfix)
+
+                tree = Arbol(postfix_expr.postfix)
+                tree.print_tree("Yalex Tree")
+
+
+                afd_directo = AFD_Directo(tree)
+                Graph(afd_directo, postfix_expr.regex.replace("'",""), "AFD_Directo")
+
+                # print("\nSimulacion:")
+                # resultados_simulacion = {}
+
+                # for test in prueba:
+                #     resultados_simulacion[test] = [0,0]
+
+                #     if Simulacion(afd_directo, test, 'AFD').resultado == True:
+                #         resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
+                #     else:
+                #         resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
+                    
+                    
+
+                # table = PrettyTable()
+                # table.field_names = ["Test", "Sí", "No"]
+                # print(expresion[opcion-1].replace("'",""))
+                # for test, results in resultados_simulacion.items():
+                #     table.add_row([test, results[0], results[1]])
+                # print(table)
+
+                opcion = 0
+                input("\nPresione ENTER para continuar...")
         
         else:
             print("\nOpción inválida.")
