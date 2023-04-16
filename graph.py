@@ -12,14 +12,14 @@ def Graph(automata, regex, type):
     dot.attr(fontsize='20')
     
     # Agrega estado inicial
-    dot.attr('node', shape='circle', fillcolor='green', style='filled')
+    dot.attr('node', shape='circle')
     dot.node("", shape='none',height='0',width='0')
-    dot.node(str(automata.estado_inicial.id), shape="circle")
+    dot.node(str(automata.estado_inicial.id), shape="circle", color="blue")
     dot.edge("", str(automata.estado_inicial.id))
 
     # Agrega estados finales
     for final_state in automata.EstadosFinales.Elementos:
-        dot.node(str(final_state.id), shape="circle", peripheries="2", fillcolor="red", style='filled')
+        dot.node(str(final_state.id), shape="circle", peripheries="2", color="red")
 
     # Agrega estados y transiciones
     for estado in automata.Estados.Elementos:

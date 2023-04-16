@@ -16,10 +16,9 @@ from prettytable import PrettyTable
 
 def main():
 
-    # ((ε|0)1*)* FIXME: No funciona directo
+    with open("./yalex/prueba.txt", "r") as archivo:
+        contenido = archivo.read()
 
-    expresion = ["(2|123|5)+","(a*|b*)c", "(b|b)*abb(a|b)*", "(a|ε)b(a+)c?", "(a|b)*a(a|b)(a|b)","b*ab?", "b+abc+", "ab*ab*", "0(0|1)*0", "((ε|0)1*)*", "(0|1)*0(0|1)(0|1)", "(00)*(11)*", "(0|1)1*(0|1)", "0?(1|ε)?0*", "((1?)*)*", "(01)*(10)*"]
-    prueba = ['a', 'baa', 'baaa','ababb', '010000', 'aac', 'abba', 'abaaaac', 'aabb', '1', 'babcc']
     yal_file = ["slr-0.yal", "slr-1.yal", "slr-2.yal", "slr-3.yal", "slr-4.yal"]
     opcion = 0
 
@@ -51,18 +50,10 @@ def main():
                 afd_directo = AFD_Directo(tree)
                 Graph(afd_directo, postfix_expr.regex.replace("'",""), "AFD_Directo")
 
-                # print("\nSimulacion:")
-                # resultados_simulacion = {}
+                print("\nSimulacion:")
+                resultados_simulacion = {}
 
-                # for test in prueba:
-                #     resultados_simulacion[test] = [0,0]
-
-                #     if Simulacion(afd_directo, test, 'AFD').resultado == True:
-                #         resultados_simulacion[test][0] = resultados_simulacion[test][0] + 1
-                #     else:
-                #         resultados_simulacion[test][1] = resultados_simulacion[test][1] + 1
-                    
-                    
+                resultados = Simulacion(afd_directo, contenido, 'Yalex').resultado
 
                 # table = PrettyTable()
                 # table.field_names = ["Test", "Sí", "No"]
