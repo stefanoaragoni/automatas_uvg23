@@ -51,16 +51,13 @@ def main():
                 Graph(afd_directo, postfix_expr.regex.replace("'",""), "AFD_Directo")
 
                 print("\nSimulacion:")
-                resultados_simulacion = {}
-
                 resultados = Simulacion(afd_directo, contenido, 'Yalex').resultado
 
-                # table = PrettyTable()
-                # table.field_names = ["Test", "Sí", "No"]
-                # print(expresion[opcion-1].replace("'",""))
-                # for test, results in resultados_simulacion.items():
-                #     table.add_row([test, results[0], results[1]])
-                # print(table)
+                table = PrettyTable()
+                table.field_names = ["TOKEN", "VALUE"]
+                for resultado in resultados:
+                    table.add_row([resultado[0], resultado[1]])
+                print(table)
 
                 opcion = 0
                 input("\nPresione ENTER para continuar...")

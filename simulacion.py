@@ -87,7 +87,7 @@ class Simulacion:
                     break
 
         self.resultado = resultado
-        print(resultado)
+
 
 
 
