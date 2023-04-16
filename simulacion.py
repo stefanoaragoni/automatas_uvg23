@@ -60,9 +60,6 @@ class Simulacion:
         for head in header:
             exec(head)
 
-        for trail in trailer:
-            exec(trail)
-
         for i, char in enumerate(cadena):
 
             self.simularAFD(current_state, char)
@@ -102,6 +99,9 @@ class Simulacion:
                 else:
                     resultado.append(["Error Lexico", char])
                     break
+
+        for trail in trailer:
+            exec(trail)
 
         self.resultado = resultado
 

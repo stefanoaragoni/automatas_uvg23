@@ -10,6 +10,7 @@ from afd_minimizacion import AFD_Minimizacion
 from postfix import Postfix
 from arbol import Arbol
 from graph import Graph
+from scanner_generator import scannerGenerator
 from yal_parser import YalParser
 from simulacion import Simulacion
 from prettytable import PrettyTable
@@ -36,6 +37,7 @@ def main():
 
             header = yal.header
             trailer = yal.trailer
+            tokens = yal.tokens
 
             if postfix_expr.error:
                 print("\nExpresión Regular inválida!") 
@@ -49,18 +51,18 @@ def main():
                 tree = Arbol(postfix_expr.postfix)
                 tree.print_tree("Yalex Tree")
 
-
                 afd_directo = AFD_Directo(tree)
                 Graph(afd_directo, postfix_expr.regex.replace("'",""), "AFD_Directo")
 
-                print("\nSimulacion:")
-                resultados = Simulacion(afd_directo, contenido, 'Yalex', header, trailer).resultado
+                print("\nGeneración de Scanner:")
+                scannerGenerator(afd_directo, header, trailer, tokens, yal_file[opcion-1].replace(".yal",""))
 
-                table = PrettyTable()
-                table.field_names = ["TOKEN", "VALUE"]
-                for resultado in resultados:
-                    table.add_row([resultado[0], resultado[1]])
-                print(table)
+                # resultados = Simulacion(afd_directo, contenido, 'Yalex', header, trailer).resultado
+                # table = PrettyTable()
+                # table.field_names = ["TOKEN", "VALUE"]
+                # for resultado in resultados:
+                #     table.add_row([resultado[0], resultado[1]])
+                # print(table)
 
                 opcion = 0
                 input("\nPresione ENTER para continuar...")

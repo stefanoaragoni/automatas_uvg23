@@ -266,7 +266,7 @@ class YalParser():
                     comment = not comment
                 
                 if comment == False:
-                    if char == "\n" or char == "\t":
+                    if char == "\t":
                         continue
                     new_token += char
                 else:
@@ -530,7 +530,7 @@ class YalParser():
             token_temp = self.tokens[key]
 
             if token_temp == "" or token_temp == " ":
-                self.tokens[key] = "result_token = None"
+                self.tokens[key] = "return None"
 
             value = "'#"+self.tokens[key]+"'"
 
