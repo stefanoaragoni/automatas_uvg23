@@ -351,6 +351,11 @@ class YalParser():
         self.regex = []
 
         for key in self.tokens:
+            token_temp = self.tokens[key]
+
+            if token_temp == "" or token_temp == " ":
+                self.tokens[key] = "result_token = None"
+
             value = "'#"+self.tokens[key]+"'"
 
             if key in updated_content.keys():

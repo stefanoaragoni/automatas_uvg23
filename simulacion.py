@@ -55,6 +55,7 @@ class Simulacion:
         last_result = None
         char_set = []
         resultado = []
+        result_token = None
 
         for i, char in enumerate(cadena):
 
@@ -69,12 +70,22 @@ class Simulacion:
                     last_result = True
 
                     if i == len(cadena) - 1:
-                        resultado.append([current_state.token.id, ''.join(char_set)])
+                        token = ''.join(char_set)
+                        temp_token = (current_state.token.id).replace("'","").replace('"', "'").replace("#", "")
+                        globals_dict = {"token": token}
+                        exec(temp_token, globals_dict)
+                        result_token = globals_dict.get('result_token', None)
+                        resultado.append([result_token, token])
 
                     break
 
                 elif last_result and self.resultado == None:
-                    resultado.append([current_state.token.id, ''.join(char_set)])
+                    token = ''.join(char_set)
+                    temp_token = (current_state.token.id).replace("'","").replace('"', "'").replace("#", "")
+                    globals_dict = {"token": token}
+                    exec(temp_token, globals_dict)
+                    result_token = globals_dict.get('result_token', None)
+                    resultado.append([result_token, token])
 
                     current_state = estado
                     char_set = []

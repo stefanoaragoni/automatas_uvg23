@@ -9,16 +9,15 @@ rule tokens =
     ws  {return NONE}
   
 	| id  {  
-				if t.value = 0: return ID
-				else:
-					return NONE
+				if token != "abc": result_token = "ID"
+				else: result_token = None
 
 	}         (* Cambie por una acción válida, que devuelva el token *)
   
-	| '+'       { return PLUS }
-  	| '*'       { return TIMES }
-  	| '('       { return LPAREN }
-  	| ')'       { return RPAREN }
-	| '*)'		 { return STARTCOMMENT }
+	| '+'       { result_token = "PLUS" }
+  	| '*'       { result_token = "TIMES" }
+  	| '('       { result_token = "LPAREN" }
+  	| ')'       { result_token = "RPAREN" }
+	| '*)'		 { result_token = "STARTCOMMENT" }
 
 (* Introducir cualquier trailer aqui *)
