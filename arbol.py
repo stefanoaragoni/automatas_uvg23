@@ -37,7 +37,7 @@ class Arbol:
 
         # Recorre la expresión regular en postfix
         for char in self.regex:
-            if char in self.operators:
+            if char in self.operators and not compund:
                 if char == '|':
                     right = stack.pop()
                     left = stack.pop()

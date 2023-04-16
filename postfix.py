@@ -12,7 +12,7 @@ class Postfix:
         self.regex = regex
         self.error = False
 
-        self.verify_parenthesis()
+        #self.verify_parenthesis()
         self.regex = self.add_concatenation()
         if not self.error:
             self.verify_regex()
@@ -117,9 +117,9 @@ class Postfix:
             print('La expresión regular infix no puede terminar con un operador como •, "|".')
             self.error = True
             
-        if self.regex.count('(') != self.regex.count(')'):
-            print('Los paréntesis de la expresión regular no están balanceados.')
-            self.error = True
+        # if self.regex.count('(') != self.regex.count(')'):
+        #     print('Los paréntesis de la expresión regular no están balanceados.')
+        #     self.error = True
 
         if self.regex.count('[') > 1 or self.regex.count(']') > 1:
             print('La expresión regular no puede tener más de un conjunto de caracteres. Ejemplo: "[]" o "()", no ambos.')

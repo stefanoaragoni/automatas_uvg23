@@ -532,7 +532,7 @@ class YalParser():
             if token_temp == "" or token_temp == " ":
                 self.tokens[key] = "return None"
 
-            value = "'#"+self.tokens[key]+"'"
+            value = "'#"+key.replace("'","")+"'"
 
             if key in updated_content.keys():
                 temporal_regex = "(("+updated_content[key]+")"+value+")"
