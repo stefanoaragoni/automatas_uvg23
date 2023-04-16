@@ -1,18 +1,22 @@
+(* Introducir cualquier header aqui *)
+{print("Lectura iniciada")
+print("Lectura iniciada 2")
+a = 55
+print(a)}
+
 	let delim = [' ''\t''\n']
  let ws = delim+ 
 let letter = ['A'-'Z''a'-'z']
 
-lets digit = ['0123456789']
+letshfads digit = ['0123456789']
    let id = letter (letter | digit)*
 
-rule tokens = 
-    ws  {return NONE}
+rulefsd tokens = 
+    ws  {result_token = "WHITESPACE"}
   
 	| id  {  
-				if token != "abc": result_token = "ID"
-				else: result_token = None
-
-	}         (* Cambie por una acción válida, que devuelva el token *)
+				result_token = "ID" if token != "abc" else "ID:ABC"
+	}
   
 	| '+'       { result_token = "PLUS" }
   	| '*'       { result_token = "TIMES" }
@@ -21,3 +25,7 @@ rule tokens =
 	| '*)'		 { result_token = "STARTCOMMENT" }
 
 (* Introducir cualquier trailer aqui *)
+{
+print("Lectura finalizada")
+print("Stefano Aragoni")
+}

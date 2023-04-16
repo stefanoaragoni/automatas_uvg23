@@ -34,6 +34,9 @@ def main():
             yal = YalParser("./yalex/"+yal_file[opcion-1])
             postfix_expr = Postfix(yal.regex)
 
+            header = yal.header
+            trailer = yal.trailer
+
             if postfix_expr.error:
                 print("\nExpresión Regular inválida!") 
                 opcion = 0
@@ -51,7 +54,7 @@ def main():
                 Graph(afd_directo, postfix_expr.regex.replace("'",""), "AFD_Directo")
 
                 print("\nSimulacion:")
-                resultados = Simulacion(afd_directo, contenido, 'Yalex').resultado
+                resultados = Simulacion(afd_directo, contenido, 'Yalex', header, trailer).resultado
 
                 table = PrettyTable()
                 table.field_names = ["TOKEN", "VALUE"]

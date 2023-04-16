@@ -18,11 +18,81 @@ class YalParser():
 
         self.lets = {}
         self.tokens = {}
+        self.header = []
+        self.trailer = []
 
         self.parse()
         self.expand_lets()
 
         self.generate_regex()
+
+        self.header_trailer()
+
+    def header_trailer(self):
+        header = []
+        trailer = []
+
+        if self.header != []:
+
+            comment = False
+            temporal_line = ""
+            for header_line in self.header:
+                for i, char in enumerate(header_line):
+                    if char == "'" or char == '"':
+                        comment = not comment
+
+                    if comment == False and (char == "\n") or i == len(header_line)-1:                    
+                        if char != "\n":
+                            temporal_line += char
+
+                        if temporal_line.strip() != "":
+                            header.append(temporal_line)
+                            temporal_line = ""
+                            continue
+
+                        else:
+                            continue
+
+                    temporal_line += char
+
+            header[0] = header[0][1:]
+            header[-1] = header[-1][0:-1]
+
+            self.header = []
+            for head in header:
+                if head.strip() != "":
+                    self.header.append(head)
+
+        if self.trailer != []:
+
+            comment = False
+            temporal_line = ""
+            for trailer_line in self.trailer:
+                for i, char in enumerate(trailer_line):
+                    if char == "'" or char == '"':
+                        comment = not comment
+
+                    if comment == False and (char == "\n") or i == len(trailer_line)-1:
+                        if char != "\n":
+                            temporal_line += char
+
+                        if temporal_line.strip() != "":
+                            trailer.append(temporal_line)
+                            temporal_line = ""
+                            continue
+
+                        else:
+                            continue
+
+                    temporal_line += char
+
+            trailer[0] = trailer[0][1:]
+            trailer[-1] = trailer[-1][0:-1]
+
+            self.trailer = []
+            for trail in trailer:
+                if trail.strip() != "":
+                    self.trailer.append(trail)
 
     def parse(self):
 
@@ -30,84 +100,181 @@ class YalParser():
         tokens_array = []
 
         # abrir archivo yal
-        with open(self.file, "r") as file:
-            rules = False
-            token_completo = ""
-            start_end_token = [0,0]
+        with open(self.file, "r") as archivo:
+            file = archivo.read()
 
-            # revisar a que corresponde cada linea
-            for line in file:
-                line = line.strip()
+        rules = [False, 0, 0]
+        regex = [False, 0]
+        header = True
+        trailer = False
+        comment = 0
 
-                starting_with = ""
-                for char in line:
-                    if char == " ":
-                        break
-                    else:
-                        starting_with += char
+        token_completo = ""
+        start_end_token = [0,0]
 
-                if line == "":
-                    pass
+        # revisar a que corresponde cada linea
+        file.strip()
 
-                # let = | se agrega a let_array
-                elif starting_with.startswith("let"):
-                    contenido_to_store = ""
-                    let_name = ""
-                    first_space = False
+        # Limpieza de comentarios
+        temporal_line = ""
+        for i, char in enumerate(file):
+            if i+1 < len(file):
+                if char == "(" and file[i+1] == "*":
+                    comment = 2
 
-                    for i, char in enumerate(line):
-                        if char == " " and not first_space:
-                            first_space = True
+                elif char == "*" and file[i+1] == ")" and comment == 2:
+                    comment = comment - 1
 
-                        if first_space:
-                            contenido_to_store += char
-                        else:
-                            let_name += char
+            if char == ")" and comment == 1:
+                comment = comment - 1
 
-                    if let_name.upper() == "LET":
-                        pass
-                    else:
-                        print(f"\nDeteccion Error: Se encontro un error en la declaracion de let: {line}.")
+            elif comment == 0:
+                temporal_line += char
 
-                    let_array.append((contenido_to_store).strip())
-                
-                # rule = | se activa rules
-                elif starting_with.startswith("rule"):
-                    if starting_with.upper() == "RULE":
-                        pass
-                    else:
-                        print(f"\nDeteccion Error: Se encontro un error en la declaracion de rule: {line}.")
-                    rules = True
+        file = temporal_line
 
-                # tokens = | se agrega a tokens_array
-                elif rules:
+        comment = False
+        temporal_line = ""
+        equal_sign = False
+        # separar en header, trailer, tokens y lets
+        for i, char in enumerate(file):
+            if char == "'" or  char == '"':
+                comment = not comment
 
-                    if "{" not in line and start_end_token[0] == 0 and start_end_token[1] == 0:
-                        tokens_array.append(line.strip())
+            if rules[0]:
+                if char == "=" and equal_sign == False:
+                    equal_sign = True
+                    temporal_line = ""
 
-                    else:
-                        for i, char in enumerate(line.strip()):
-                            if i == 0:
-                                token_completo += " "
+                elif equal_sign:
+                    temporal_line += char
 
-                            if char == "}" or char == "{":
-                                start_end_token[0] += 1
-                                start_end_token[1] += 1
+            elif comment == False and char == "\n":
+                current_line = temporal_line.strip()
 
-                                if start_end_token[0] == 2 and start_end_token[1] == 2:
-                                    start_end_token[0] = 0
+                if current_line == "":
+                    temporal_line = ""
+                    continue
 
-                            if i == len(line)-1 and start_end_token[0] == 0 and start_end_token[1] == 2:
-                                token_completo += char
-                                tokens_array.append(token_completo)
-                                token_completo = ""
-                                start_end_token[0] = 0
-                                start_end_token[1] = 0
+                if header:
+                    self.header.append(current_line)
+                    temporal_line = ""
+
+                elif regex:
+                    let_array.append(current_line)
+                    temporal_line = ""
+
+            else:
+
+                # Verifica que LET esté bien escrito
+                if char == " " and regex[0] and regex[1] == 0:
+                    regex[1] = 1
+                    temporal_line += char
+                    continue
+                elif char != " " and regex[0] and regex[1] == 0:
+                    continue
+
+                # Verifica que RULE esté bien escrito
+                if char == " " and rules[0] and rules[2] == 0:
+                    rules[2] = 1
+                    temporal_line += char
+                    continue
+                elif char != " " and rules[0] and rules[2] == 0:
+                    continue
+                elif char == "=" and rules[0] and rules[2] == 1:
+                    rules[2] = 2
+                    temporal_line = ""
+                    continue
+
+
+                temporal_line += char
+
+                if temporal_line.lstrip() == "rule":
+                    if i+1 < len(file):
+                        if (file[i+1]) != " ":
                             
-                            else:
-                                token_completo += char
+                            temporal_line_error = temporal_line
+                            for j in range(i+1, len(file)):
+                                if file[j] == " ":
+                                    break
+                                temporal_line_error += file[j]
 
+                            print("\nError:",temporal_line_error,"no es una palabra correcta. Tomando unicamente rule como palabra reservada.\n")
+                            rules = [True, 0, 0]
+                            continue
+
+                    header = False
+                    rules = [True, 0, 1]
+                    trailer = False
+                    regex = [False, 0]
+
+                elif temporal_line.lstrip() == "let":
+
+                    if i+1 < len(file):
+                        if (file[i+1]) != " ":
+                            
+                            temporal_line_error = temporal_line
+                            for j in range(i+1, len(file)):
+                                if file[j] == " ":
+                                    break
+                                temporal_line_error += file[j]
+
+                            print("\nError:",temporal_line_error,"no es una palabra correcta. Tomando unicamente let como palabra reservada.\n")
+                            regex = [True, 0]
+                            continue
+
+                    header = False
+                    rules = [False, 0, 0]
+                    trailer = False
+                    regex = [True, 1]
+                
         
+        tokens_array = temporal_line.split("|")
+
+        temp_trailer = ""
+        new_last_token = ""
+        start_trailer = False
+
+        for char in tokens_array[-1]:
+
+            if trailer == False:
+                new_last_token += char
+
+            if char == "}" and trailer == False:
+                trailer = True   
+
+            elif char == "{" and trailer == True:
+                trailer = True
+                start_trailer = True
+                temp_trailer += char
+
+            elif trailer and start_trailer:
+                temp_trailer += char
+
+        tokens_array[-1] = new_last_token
+        if temp_trailer != "":
+            self.trailer.append(temp_trailer)
+
+        for i, token in enumerate(tokens_array):
+            token = token.strip()
+            new_token = ""
+            comment = False
+            
+            for char in token:
+
+                if char == "'" or char == '"':
+                    comment = not comment
+                
+                if comment == False:
+                    if char == "\n" or char == "\t":
+                        continue
+                    new_token += char
+                else:
+                    new_token += char
+
+            tokens_array[i] = new_token
+
+
         # Limpieza de let_array. 
         # Resultado deseado: {regla: contenido}
 
@@ -134,6 +301,15 @@ class YalParser():
             new_line = new_line.split("=")
             new_line[0] = new_line[0].strip()
             new_line[1] = new_line[1].strip()
+
+            name_let = ""
+            for char in new_line[0].strip():
+                if char != " ":
+                    name_let += char
+                else:
+                    name_let = ""
+
+            new_line[0] = name_let
 
             comillas = 0
             contenido_sin_espacios = ""

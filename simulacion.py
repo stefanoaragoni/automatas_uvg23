@@ -1,5 +1,5 @@
 class Simulacion:
-    def __init__(self, automata, cadena, tipo):
+    def __init__(self, automata, cadena, tipo, header=None, trailer=None):
         self.automata = automata
         self.cadena = cadena
         self.current = ""
@@ -14,7 +14,7 @@ class Simulacion:
         elif tipo == "AFD":
             self.simularAFD(estado_inicial, cadena)
         elif tipo == "Yalex":
-            self.simularAFD_Yalex(estado_inicial, cadena)
+            self.simularAFD_Yalex(estado_inicial, cadena, header, trailer)
 
     def simularAFN(self, estado, cadena):
         if (estado, cadena) in self.visited:
@@ -49,13 +49,19 @@ class Simulacion:
             self.resultado = estado
             return
             
-    def simularAFD_Yalex(self, estado, cadena):
+    def simularAFD_Yalex(self, estado, cadena, header, trailer):
 
         current_state = estado
         last_result = None
         char_set = []
         resultado = []
         result_token = None
+
+        for head in header:
+            exec(head)
+
+        for trail in trailer:
+            exec(trail)
 
         for i, char in enumerate(cadena):
 
