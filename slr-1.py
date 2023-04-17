@@ -65,10 +65,14 @@ def simularAFD_Yalex(estado, cadena):
 				break
 
 			elif last_result and resultado == None:
-				token = ''.join(char_set)
-				temp_token = (current_state.token.id).replace("'", "").replace('"', "'").replace("#", "")
-				result_token = tokens(token, temp_token)
-				resultado2.append([result_token, token])
+				if (current_state.token) == None:
+					resultado2.append(["Error Lexico", ''.join(char_set)])
+
+				else:
+					token = ''.join(char_set)
+					temp_token = (current_state.token.id).replace("'", "").replace('"', "'").replace("#", "")
+					result_token = tokens(token, temp_token)
+					resultado2.append([result_token, token])
 
 				current_state = estado
 				char_set = []

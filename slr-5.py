@@ -2,35 +2,23 @@ import pickle
 from prettytable import PrettyTable
 from afd_directo import AFD_Directo
 def tokens(token, regla):
-	if regla.replace("'", "").replace('"', "") == 'ws':
-		return "WHITESPACE"
-	if regla.replace("'", "").replace('"', "") == 'id':
-		return "ID"
-	if regla.replace("'", "").replace('"', "") == 'number':
-		return "NUMBER"
-	if regla.replace("'", "").replace('"', "") == ';':
-		return "SEMICOLON"
-	if regla.replace("'", "").replace('"', "") == ':=':
-		return "ASSIGNOP"
-	if regla.replace("'", "").replace('"', "") == '<':
-		return "LT"
-	if regla.replace("'", "").replace('"', "") == '=':
-		return "EQ"
+	if regla.replace("'", "").replace('"', "") == 'espacioEnBlanco':
+		return None
+	if regla.replace("'", "").replace('"', "") == 'identificador':
+		return "Identificador"
+	if regla.replace("'", "").replace('"', "") == 'numero':
+		return "Número"
 	if regla.replace("'", "").replace('"', "") == '+':
-		return "PLUS"
+		return "Operador de suma"
 	if regla.replace("'", "").replace('"', "") == '-':
-		return "MINUS"
+		return "Operador de menus"
 	if regla.replace("'", "").replace('"', "") == '*':
-		return "TIMES"
-	if regla.replace("'", "").replace('"', "") == '/':
-		return "DIV"
-	if regla.replace("'", "").replace('"', "") == '(':
-		return "LPAREN"
-	if regla.replace("'", "").replace('"', "") == ')':
-		return "RPAREN"
+		return "Operador de multiplicación"
+	if regla.replace("'", "").replace('"', "") == '=':
+		return "Operador de asignación"
 
 #-------- SIMULACION
-with open(f'./scanner/slr-4.pkl', 'rb') as file:
+with open(f'./scanner/slr-5.pkl', 'rb') as file:
 	serialized_object = file.read()
 
 automata = pickle.loads(serialized_object)
