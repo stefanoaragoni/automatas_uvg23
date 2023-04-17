@@ -17,7 +17,7 @@ class scannerGenerator:
         self.generarTrailer()
 
     def generarHeader(self):
-        with open(f"./scanner/{self.nameOutput}.py", "w") as archivo:
+        with open(f"{self.nameOutput}.py", "w") as archivo:
             archivo.write("import pickle\n")
             archivo.write("from prettytable import PrettyTable\n")
             archivo.write("from afd_directo import AFD_Directo\n")
@@ -27,7 +27,7 @@ class scannerGenerator:
                 archivo.write(line+"\n")
 
     def generarTokens(self):
-        with open(f"./scanner/{self.nameOutput}.py", "a") as archivo:
+        with open(f"{self.nameOutput}.py", "a") as archivo:
             archivo.write("def tokens(token, regla):\n")
             for token in self.tokens:
 
@@ -62,7 +62,7 @@ class scannerGenerator:
         with open(f"./scanner/{self.nameOutput}.pkl", "wb") as file:
             file.write(serialized_object)
 
-        with open(f"./scanner/{self.nameOutput}.py", "a") as archivo:
+        with open(f"{self.nameOutput}.py", "a") as archivo:
             archivo.write("\n#-------- SIMULACION\n")
             archivo.write(f"with open(f'./scanner/{self.nameOutput}.pkl', 'rb') as file:\n")
             archivo.write("\tserialized_object = file.read()\n\n")
@@ -86,7 +86,7 @@ class scannerGenerator:
             archivo.write("\tcurrent_state = estado\n")
             archivo.write("\tlast_result = None\n")
             archivo.write("\tchar_set = []\n")
-            archivo.write("\tresultado = []\n")
+            archivo.write("\tresultado2 = []\n")
             archivo.write("\tresult_token = None\n\n")
             archivo.write("\tfor i, char in enumerate(cadena):\n\n")
             archivo.write("\t\tsimularAFD(current_state, char)\n\n")
@@ -100,22 +100,22 @@ class scannerGenerator:
             archivo.write("\t\t\t\t\ttoken = ''.join(char_set)\n")
             archivo.write("\t\t\t\t\ttemp_token = (current_state.token.id).replace(\"'\", \"\").replace('\"', \"'\").replace(\"#\", \"\")\n")
             archivo.write("\t\t\t\t\tresult_token = tokens(token, temp_token)\n")
-            archivo.write("\t\t\t\t\tresultado.append([result_token, token])\n\n")
+            archivo.write("\t\t\t\t\tresultado2.append([result_token, token])\n\n")
             archivo.write("\t\t\t\tbreak\n\n")
             archivo.write("\t\t\telif last_result and resultado == None:\n")
             archivo.write("\t\t\t\ttoken = ''.join(char_set)\n")
             archivo.write("\t\t\t\ttemp_token = (current_state.token.id).replace(\"'\", \"\").replace('\"', \"'\").replace(\"#\", \"\")\n")
             archivo.write("\t\t\t\tresult_token = tokens(token, temp_token)\n")
-            archivo.write("\t\t\t\tresultado.append([result_token, token])\n\n")
+            archivo.write("\t\t\t\tresultado2.append([result_token, token])\n\n")
             archivo.write("\t\t\t\tcurrent_state = estado\n")
             archivo.write("\t\t\t\tchar_set = []\n")
             archivo.write("\t\t\t\tlast_result = False\n\n")
             archivo.write("\t\t\t\tsimularAFD(current_state, char)\n\n")
             archivo.write("\t\t\telse:\n")
-            archivo.write("\t\t\t\tresultado.append([\"Error Lexico\", char])\n")
+            archivo.write("\t\t\t\tresultado2.append([\"Error Lexico\", char])\n")
             archivo.write("\t\t\t\tbreak\n\n")
 
-            archivo.write("\treturn resultado\n\n")
+            archivo.write("\treturn resultado2\n\n")
 
             # with open("./yalex/prueba.txt", "r") as archivo:
             #    contenido = archivo.read()
@@ -123,18 +123,18 @@ class scannerGenerator:
             archivo.write("with open('./yalex/prueba.txt', 'r') as archivo:\n")
             archivo.write("\tcontenido = archivo.read()\n\n")
 
-            archivo.write("resultado = simularAFD_Yalex(automata.estado_inicial, contenido)\n\n")
+            archivo.write("resultado2 = simularAFD_Yalex(automata.estado_inicial, contenido)\n\n")
 
             archivo.write("table = PrettyTable()\n")
             archivo.write("table.field_names = [\"TOKEN\", \"VALUE\"]\n")
-            archivo.write("for resultado in resultado:\n")
-            archivo.write("\ttable.add_row([resultado[0], resultado[1]])\n")
+            archivo.write("for res in resultado2:\n")
+            archivo.write("\ttable.add_row([res[0], res[1]])\n")
             archivo.write("print(table)\n")
 
 
 
     def generarTrailer(self):
-        with open(f"./scanner/{self.nameOutput}.py", "a") as archivo:
+        with open(f"{self.nameOutput}.py", "a") as archivo:
             if self.trailer != []:
                 archivo.write("#-------- TRAILER\n")
             for line in self.trailer:
