@@ -50,7 +50,7 @@ class scannerGenerator:
 
                 string_without_enter = string_without_enter.strip()
 
-                archivo.write("\tif regla == '"+token.replace("'","")+"':\n")
+                archivo.write("\tif regla.replace(\"'\", \"\").replace('\"', \"\") == '"+token.replace("'",'').replace('"', "")+"':\n")
 
                 for line in temporal_tokens:
                     archivo.write("\t\t"+line+"\n")

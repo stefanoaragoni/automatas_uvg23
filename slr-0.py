@@ -7,19 +7,19 @@ print("Lectura iniciada 2")
 a = 55
 print(a)
 def tokens(token, regla):
-	if regla == 'ws':
+	if regla.replace("'", "").replace('"', "") == 'ws':
 		return "WHITESPACE"
-	if regla == 'id':
+	if regla.replace("'", "").replace('"', "") == 'id':
 		return "ID" if token != "abc" else "ID:ABC"
-	if regla == '+':
+	if regla.replace("'", "").replace('"', "") == '+':
 		return "PLUS"
-	if regla == '*':
+	if regla.replace("'", "").replace('"', "") == '*':
 		return "TIMES"
-	if regla == '(':
+	if regla.replace("'", "").replace('"', "") == '(':
 		return "LPAREN"
-	if regla == ')':
+	if regla.replace("'", "").replace('"', "") == ')':
 		return "RPAREN"
-	if regla == '*)':
+	if regla.replace("'", "").replace('"', "") == '*)':
 		return "STARTCOMMENT"
 
 #-------- SIMULACION

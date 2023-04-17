@@ -2,17 +2,17 @@ import pickle
 from prettytable import PrettyTable
 from afd_directo import AFD_Directo
 def tokens(token, regla):
-	if regla == 'ws':
+	if regla.replace("'", "").replace('"', "") == 'ws':
 		return "WHITESPACE"
-	if regla == 'id':
+	if regla.replace("'", "").replace('"', "") == 'id':
 		return "ID"
-	if regla == '+':
+	if regla.replace("'", "").replace('"', "") == '+':
 		return "PLUS"
-	if regla == '*':
+	if regla.replace("'", "").replace('"', "") == '*':
 		return "TIMES"
-	if regla == '(':
+	if regla.replace("'", "").replace('"', "") == '(':
 		return "LPAREN"
-	if regla == ')':
+	if regla.replace("'", "").replace('"', "") == ')':
 		return "RPAREN"
 
 #-------- SIMULACION
