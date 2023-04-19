@@ -14,7 +14,7 @@ class Simulacion:
         elif tipo == "AFD":
             self.simularAFD(estado_inicial, cadena)
         elif tipo == "Yalex":
-            self.simularAFD_Yalex(estado_inicial, cadena, header, trailer)
+            self.simularAFD_Yalex(estado_inicial, cadena)
 
     def simularAFN(self, estado, cadena):
         if (estado, cadena) in self.visited:
@@ -49,16 +49,13 @@ class Simulacion:
             self.resultado = estado
             return
             
-    def simularAFD_Yalex(self, estado, cadena, header, trailer):
+    def simularAFD_Yalex(self, estado, cadena):
 
         current_state = estado
         last_result = None
         char_set = []
         resultado = []
         result_token = None
-
-        for head in header:
-            exec(head)
 
         for i, char in enumerate(cadena):
 
@@ -75,20 +72,18 @@ class Simulacion:
                     if i == len(cadena) - 1:
                         token = ''.join(char_set)
                         temp_token = (current_state.token.id).replace("'","").replace('"', "'").replace("#", "")
-                        globals_dict = {"token": token}
-                        exec(temp_token, globals_dict)
-                        result_token = globals_dict.get('result_token', None)
-                        resultado.append([result_token, token])
+                        resultado.append([temp_token, token])
 
                     break
 
                 elif last_result and self.resultado == None:
-                    token = ''.join(char_set)
-                    temp_token = (current_state.token.id).replace("'","").replace('"', "'").replace("#", "")
-                    globals_dict = {"token": token}
-                    exec(temp_token, globals_dict)
-                    result_token = globals_dict.get('result_token', None)
-                    resultado.append([result_token, token])
+                    if (current_state.token) == None:
+                        resultado.append(["Error_Lexico", ''.join(char_set)])
+                    
+                    else:
+                        token = ''.join(char_set)
+                        temp_token = (current_state.token.id).replace("'","").replace('"', "'").replace("#", "")
+                        resultado.append([temp_token, token])
 
                     current_state = estado
                     char_set = []
@@ -97,11 +92,8 @@ class Simulacion:
                     self.simularAFD(current_state, char)
 
                 else:
-                    resultado.append(["Error Lexico", char])
+                    resultado.append(["Error_Lexico", char])
                     break
-
-        for trail in trailer:
-            exec(trail)
 
         self.resultado = resultado
 

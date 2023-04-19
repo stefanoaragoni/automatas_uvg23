@@ -14,11 +14,11 @@ class scannerGenerator:
         self.generarHeader()
         self.generarTokens()
         self.generarSimulacion()
-        self.generarTrailer()
 
     def generarHeader(self):
         with open(f"{self.nameOutput}.py", "w") as archivo:
             archivo.write("import pickle\n")
+            archivo.write("from simulacion import Simulacion\n")
             archivo.write("from prettytable import PrettyTable\n")
             archivo.write("from afd_directo import AFD_Directo\n")
             if self.header != []:
@@ -26,9 +26,11 @@ class scannerGenerator:
             for line in self.header:
                 archivo.write(line+"\n")
 
+            archivo.write("\n\n#-------- TOKENS\n")
+
     def generarTokens(self):
         with open(f"{self.nameOutput}.py", "a") as archivo:
-            archivo.write("def tokens(token, regla):\n")
+            archivo.write("def tokens(regla, token):\n")
             for token in self.tokens:
 
                 temporal_tokens = []
@@ -54,93 +56,51 @@ class scannerGenerator:
 
                 for line in temporal_tokens:
                     archivo.write("\t\t"+line+"\n")
+            
+            archivo.write("\telse:\n")
+            archivo.write("\t\treturn 'Error: Token no definido!'\n\n")
 
     def generarSimulacion(self):
         serialized_object = pickle.dumps(self.afd_directo)
+
+        with open(f"{self.nameOutput}.py", "a") as archivo:
+            archivo.write("\n#-------- SIMULACION\n")
+            archivo.write("def simulacion():\n")
 
         # Save the serialized object to a file
         with open(f"./scanner/{self.nameOutput}.pkl", "wb") as file:
             file.write(serialized_object)
 
         with open(f"{self.nameOutput}.py", "a") as archivo:
-            archivo.write("\n#-------- SIMULACION\n")
-            archivo.write(f"with open(f'./scanner/{self.nameOutput}.pkl', 'rb') as file:\n")
-            archivo.write("\tserialized_object = file.read()\n\n")
-            archivo.write("automata = pickle.loads(serialized_object)\n")
-            archivo.write("resultado = None\n\n")
+            archivo.write(f"\twith open(f'./scanner/{self.nameOutput}.pkl', 'rb') as file:\n")
+            archivo.write("\t\tserialized_object = file.read()\n\n")
+            archivo.write("\tautomata = pickle.loads(serialized_object)\n")
+            archivo.write("\tresultado = None\n\n")
 
-            archivo.write("def simularAFD(estado, cadena):\n\n")
-            archivo.write("\tglobal automata\n")
-            archivo.write("\tglobal resultado\n\n")
-            archivo.write("\tif len(cadena) != 0:\n")
-            archivo.write("\t\tfor transicion in automata.transiciones:\n")
-            archivo.write("\t\t\tif transicion.estado_origen == estado and transicion.el_simbolo.id.replace(\"'\", \"\") == str(ord(cadena[0])):\n")
-            archivo.write("\t\t\t\tsimularAFD(transicion.estado_destino, cadena[1:])\n")
-            archivo.write("\tif len(cadena) == 0:\n")
-            archivo.write("\t\tresultado = estado\n")
-            archivo.write("\t\treturn\n\n")
+            archivo.write("\twith open('./yalex/prueba.txt', 'r') as archivo:\n")
+            archivo.write("\t\tcontenido = archivo.read()\n\n")
 
-            archivo.write("def simularAFD_Yalex(estado, cadena):\n\n")
-            archivo.write("\tglobal automata\n")
-            archivo.write("\tglobal resultado\n")
-            archivo.write("\tcurrent_state = estado\n")
-            archivo.write("\tlast_result = None\n")
-            archivo.write("\tchar_set = []\n")
-            archivo.write("\tresultado2 = []\n")
-            archivo.write("\tresult_token = None\n\n")
-            archivo.write("\tfor i, char in enumerate(cadena):\n\n")
-            archivo.write("\t\tsimularAFD(current_state, char)\n\n")
-            archivo.write("\t\twhile True:\n")
-            archivo.write("\t\t\tif resultado:\n")
-            archivo.write("\t\t\t\tcurrent_state = resultado\n")
-            archivo.write("\t\t\t\tchar_set.append(char)\n")
-            archivo.write("\t\t\t\tresultado = None\n")
-            archivo.write("\t\t\t\tlast_result = True\n\n")
-            archivo.write("\t\t\t\tif i == len(cadena) - 1:\n")
-            archivo.write("\t\t\t\t\ttoken = ''.join(char_set)\n")
-            archivo.write("\t\t\t\t\ttemp_token = (current_state.token.id).replace(\"'\", \"\").replace('\"', \"'\").replace(\"#\", \"\")\n")
-            archivo.write("\t\t\t\t\tresult_token = tokens(token, temp_token)\n")
-            archivo.write("\t\t\t\t\tresultado2.append([result_token, token])\n\n")
-            archivo.write("\t\t\t\tbreak\n\n")
-            archivo.write("\t\t\telif last_result and resultado == None:\n")
-            archivo.write("\t\t\t\tif (current_state.token) == None:\n")
-            archivo.write("\t\t\t\t\tresultado2.append([\"Error Lexico\", ''.join(char_set)])\n\n")
-            archivo.write("\t\t\t\telse:\n")
-            archivo.write("\t\t\t\t\ttoken = ''.join(char_set)\n")
-            archivo.write("\t\t\t\t\ttemp_token = (current_state.token.id).replace(\"'\", \"\").replace('\"', \"'\").replace(\"#\", \"\")\n")
-            archivo.write("\t\t\t\t\tresult_token = tokens(token, temp_token)\n")
-            archivo.write("\t\t\t\t\tresultado2.append([result_token, token])\n\n")
-            archivo.write("\t\t\t\tcurrent_state = estado\n")
-            archivo.write("\t\t\t\tchar_set = []\n")
-            archivo.write("\t\t\t\tlast_result = False\n\n")
-            archivo.write("\t\t\t\tsimularAFD(current_state, char)\n\n")
-            archivo.write("\t\t\telse:\n")
-            archivo.write("\t\t\t\tresultado2.append([\"Error Lexico\", char])\n")
-            archivo.write("\t\t\t\tbreak\n\n")
+            archivo.write("\tresultado = Simulacion(automata, contenido, 'Yalex').resultado\n")
 
-            archivo.write("\treturn resultado2\n\n")
+            archivo.write("\tfor res in resultado:\n")
+            archivo.write("\t\tres_token = tokens(res[0], res[1])\n")
+            archivo.write("\t\tres.append(res_token)\n\n")
 
-            # with open("./yalex/prueba.txt", "r") as archivo:
-            #    contenido = archivo.read()
+            archivo.write("\ttable = PrettyTable()\n")
+            archivo.write("\ttable.field_names = [\"TOKEN\", \"VALUE\",\"RESULT\"]\n")
+            archivo.write("\tfor res in resultado:\n")
+            archivo.write("\t\ttable.add_row([res[0], res[1], res[2]])\n")
+            archivo.write("\tprint(table)\n")
 
-            archivo.write("with open('./yalex/prueba.txt', 'r') as archivo:\n")
-            archivo.write("\tcontenido = archivo.read()\n\n")
-
-            archivo.write("resultado2 = simularAFD_Yalex(automata.estado_inicial, contenido)\n\n")
-
-            archivo.write("table = PrettyTable()\n")
-            archivo.write("table.field_names = [\"TOKEN\", \"VALUE\"]\n")
-            archivo.write("for res in resultado2:\n")
-            archivo.write("\ttable.add_row([res[0], res[1]])\n")
-            archivo.write("print(table)\n")
-
-
-
-    def generarTrailer(self):
-        with open(f"{self.nameOutput}.py", "a") as archivo:
             if self.trailer != []:
-                archivo.write("#-------- TRAILER\n")
+                archivo.write("\n\t#-------- TRAILER\n")
             for line in self.trailer:
-                archivo.write(line+"\n")
+                archivo.write("\t"+line+"\n")
+
+            archivo.write("\n\treturn resultado\n")
+
+            archivo.write("\nsimulacion()\n")
+
+
         
 
