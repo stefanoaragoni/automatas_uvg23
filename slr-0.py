@@ -14,6 +14,7 @@ def tokens(regla, token):
 	if regla.replace("'", "").replace('"', "") == 'ws':
 		return "WHITESPACE"
 	if regla.replace("'", "").replace('"', "") == 'id':
+		print("Hola!")
 		return "ID" if token != "abc" else "ID:ABC"
 	if regla.replace("'", "").replace('"', "") == '+':
 		return "PLUS"

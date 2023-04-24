@@ -16,11 +16,13 @@ rulefsd tokens =
     ws  {return "WHITESPACE"}
   
 	| id  {  
+				print("Hola!")
 				return "ID" if token != "abc" else "ID:ABC"
 	}
   
 	| '+'       { return "PLUS" }
-  	| '*'       { return "TIMES" }
+
+  	| '*'    { return "TIMES" }
   	| '('       { return "LPAREN" }
   	| ')'       { return "RPAREN" }
 	| '*)'		 { return "STARTCOMMENT" }
