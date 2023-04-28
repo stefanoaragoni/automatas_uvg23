@@ -18,11 +18,81 @@ class YalParser():
 
         self.lets = {}
         self.tokens = {}
+        self.header = []
+        self.trailer = []
 
         self.parse()
         self.expand_lets()
 
         self.generate_regex()
+
+        self.header_trailer()
+
+    def header_trailer(self):
+        header = []
+        trailer = []
+
+        if self.header != []:
+
+            comment = False
+            temporal_line = ""
+            for header_line in self.header:
+                for i, char in enumerate(header_line):
+                    if char == "'" or char == '"':
+                        comment = not comment
+
+                    if comment == False and (char == "\n") or i == len(header_line)-1:                    
+                        if char != "\n":
+                            temporal_line += char
+
+                        if temporal_line.strip() != "":
+                            header.append(temporal_line)
+                            temporal_line = ""
+                            continue
+
+                        else:
+                            continue
+
+                    temporal_line += char
+
+            header[0] = header[0][1:]
+            header[-1] = header[-1][0:-1]
+
+            self.header = []
+            for head in header:
+                if head.strip() != "":
+                    self.header.append(head)
+
+        if self.trailer != []:
+
+            comment = False
+            temporal_line = ""
+            for trailer_line in self.trailer:
+                for i, char in enumerate(trailer_line):
+                    if char == "'" or char == '"':
+                        comment = not comment
+
+                    if comment == False and (char == "\n") or i == len(trailer_line)-1:
+                        if char != "\n":
+                            temporal_line += char
+
+                        if temporal_line.strip() != "":
+                            trailer.append(temporal_line)
+                            temporal_line = ""
+                            continue
+
+                        else:
+                            continue
+
+                    temporal_line += char
+
+            trailer[0] = trailer[0][1:]
+            trailer[-1] = trailer[-1][0:-1]
+
+            self.trailer = []
+            for trail in trailer:
+                if trail.strip() != "":
+                    self.trailer.append(trail)
 
     def parse(self):
 
@@ -30,29 +100,181 @@ class YalParser():
         tokens_array = []
 
         # abrir archivo yal
-        with open(self.file, "r") as file:
-            rules = False
+        with open(self.file, "r") as archivo:
+            file = archivo.read()
 
-            # revisar a que corresponde cada linea
-            for line in file:
-                line = line.strip()
+        rules = [False, 0, 0]
+        regex = [False, 0]
+        header = True
+        trailer = False
+        comment = 0
 
-                if line == "":
-                    pass
+        token_completo = ""
+        start_end_token = [0,0]
 
-                # let = | se agrega a let_array
-                elif line.startswith("let"):
-                    let_array.append((line[4:]).strip())
+        # revisar a que corresponde cada linea
+        file.strip()
+
+        # Limpieza de comentarios
+        temporal_line = ""
+        for i, char in enumerate(file):
+            if i+1 < len(file):
+                if char == "(" and file[i+1] == "*":
+                    comment = 2
+
+                elif char == "*" and file[i+1] == ")" and comment == 2:
+                    comment = comment - 1
+
+            if char == ")" and comment == 1:
+                comment = comment - 1
+
+            elif comment == 0:
+                temporal_line += char
+
+        file = temporal_line
+
+        comment = False
+        temporal_line = ""
+        equal_sign = False
+        # separar en header, trailer, tokens y lets
+        for i, char in enumerate(file):
+            if char == "'" or  char == '"':
+                comment = not comment
+
+            if rules[0]:
+                if char == "=" and equal_sign == False:
+                    equal_sign = True
+                    temporal_line = ""
+
+                elif equal_sign:
+                    temporal_line += char
+
+            elif comment == False and char == "\n":
+                current_line = temporal_line.strip()
+
+                if current_line == "":
+                    temporal_line = ""
+                    continue
+
+                if header:
+                    self.header.append(current_line)
+                    temporal_line = ""
+
+                elif regex:
+                    let_array.append(current_line)
+                    temporal_line = ""
+
+            else:
+
+                # Verifica que LET esté bien escrito
+                if char == " " and regex[0] and regex[1] == 0:
+                    regex[1] = 1
+                    temporal_line += char
+                    continue
+                elif char != " " and regex[0] and regex[1] == 0:
+                    continue
+
+                # Verifica que RULE esté bien escrito
+                if char == " " and rules[0] and rules[2] == 0:
+                    rules[2] = 1
+                    temporal_line += char
+                    continue
+                elif char != " " and rules[0] and rules[2] == 0:
+                    continue
+                elif char == "=" and rules[0] and rules[2] == 1:
+                    rules[2] = 2
+                    temporal_line = ""
+                    continue
+
+
+                temporal_line += char
+
+                if temporal_line.lstrip() == "rule":
+                    if i+1 < len(file):
+                        if (file[i+1]) != " ":
+                            
+                            temporal_line_error = temporal_line
+                            for j in range(i+1, len(file)):
+                                if file[j] == " ":
+                                    break
+                                temporal_line_error += file[j]
+
+                            print("\nError:",temporal_line_error,"no es una palabra correcta. Tomando unicamente rule como palabra reservada.\n")
+                            rules = [True, 0, 0]
+                            continue
+
+                    header = False
+                    rules = [True, 0, 1]
+                    trailer = False
+                    regex = [False, 0]
+
+                elif temporal_line.lstrip() == "let":
+
+                    if i+1 < len(file):
+                        if (file[i+1]) != " ":
+                            
+                            temporal_line_error = temporal_line
+                            for j in range(i+1, len(file)):
+                                if file[j] == " ":
+                                    break
+                                temporal_line_error += file[j]
+
+                            print("\nError:",temporal_line_error,"no es una palabra correcta. Tomando unicamente let como palabra reservada.\n")
+                            regex = [True, 0]
+                            continue
+
+                    header = False
+                    rules = [False, 0, 0]
+                    trailer = False
+                    regex = [True, 1]
                 
-                # rule = | se activa rules
-                elif line.startswith("rule"):
-                    rules = True
-
-                # tokens = | se agrega a tokens_array
-                elif rules:
-                    tokens_array.append(line)
-
         
+        tokens_array = temporal_line.split("|")
+
+        temp_trailer = ""
+        new_last_token = ""
+        start_trailer = False
+
+        for char in tokens_array[-1]:
+
+            if trailer == False:
+                new_last_token += char
+
+            if char == "}" and trailer == False:
+                trailer = True   
+
+            elif char == "{" and trailer == True:
+                trailer = True
+                start_trailer = True
+                temp_trailer += char
+
+            elif trailer and start_trailer:
+                temp_trailer += char
+
+        tokens_array[-1] = new_last_token
+        if temp_trailer != "":
+            self.trailer.append(temp_trailer)
+
+        for i, token in enumerate(tokens_array):
+            token = token.strip()
+            new_token = ""
+            comment = False
+            
+            for char in token:
+
+                if char == "'" or char == '"':
+                    comment = not comment
+                
+                if comment == False:
+                    if char == "\t":
+                        continue
+                    new_token += char
+                else:
+                    new_token += char
+
+            tokens_array[i] = new_token
+
+
         # Limpieza de let_array. 
         # Resultado deseado: {regla: contenido}
 
@@ -80,30 +302,60 @@ class YalParser():
             new_line[0] = new_line[0].strip()
             new_line[1] = new_line[1].strip()
 
+            name_let = ""
+            for char in new_line[0].strip():
+                if char != " ":
+                    name_let += char
+                else:
+                    name_let = ""
+
+            new_line[0] = name_let
+
+            comillas = 0
+            contenido_sin_espacios = ""
+
+            for char in new_line[1]:
+                if char == "'" or char == '"':
+                    comillas = comillas + 1
+                    if comillas == 2:
+                        comillas = 0
+                
+                if char == " " and comillas == 0:
+                    pass
+                else:
+                    contenido_sin_espacios += char
+
             # almacena en diccionario
-            self.lets[new_line[0]] = new_line[1]
+            self.lets[new_line[0]] = contenido_sin_espacios
 
         # Limpieza de tokens_array.
         # Resultado deseado: {token: 'return X'}"}}
         for i in range(len(tokens_array)):
-            current_line = tokens_array[i]
+            current_line = tokens_array[i].strip()
             new_line = ""
 
+            comillas = 0
             comentario = 0
+
             for i, char in enumerate(current_line):
+
+                if char == "'" or char == '"':
+                    comillas = comillas + 1
+                    if comillas == 2:
+                        comillas = 0
                 
                 # elimina comentarios
                 if i+1 < len(current_line):
-                    if char == "(" and current_line[i+1] == "*":
+                    if char == "(" and current_line[i+1] == "*" and comillas == 0:
                         comentario = 2
 
-                    elif char == "*" and current_line[i+1] == ")":
+                    elif char == "*" and current_line[i+1] == ")" and comillas == 0:
                         comentario = comentario - 1
 
                 # elimina comentarios
                 comment_ended = False
                 if i-1 >= 0:
-                    if char == ")" and current_line[i-1] == "*":
+                    if char == ")" and current_line[i-1] == "*" and  comillas == 0:
                         comentario = comentario - 1
                         comment_ended = True
 
@@ -127,18 +379,15 @@ class YalParser():
 
                 # separa contenido en nombre y contenido
                 for char2 in new_line:
-
-                    if temp_word == "return":
-                        temp_word = ""
-                        return_flag = True
-                        pass
                     
-                    elif char2 == " " and not return_flag:
+                    if char2 == " " and not return_flag:
                         if temp_word != "":
                             elements[0] = temp_word
                             temp_word = ""
         
                     elif char2 == "{":
+                        temp_word = ""
+                        return_flag = True
                         pass
 
                     elif char2 == "}" and return_flag:
@@ -278,9 +527,16 @@ class YalParser():
         self.regex = []
 
         for key in self.tokens:
+            token_temp = self.tokens[key]
+
+            if token_temp == "" or token_temp == " ":
+                self.tokens[key] = "return None"
+
+            value = "'#"+key.replace("'","")+"'"
 
             if key in updated_content.keys():
-                self.regex.append(updated_content[key])
+                temporal_regex = "(("+updated_content[key]+")"+value+")"
+                self.regex.append(temporal_regex)
 
             else:
                 if "'" in key or '"' in key:
@@ -295,11 +551,13 @@ class YalParser():
                             temporal_regex.append("'"+str(ord(char))+"'")
 
                         temporal_regex = "("+("".join(temporal_regex))+")"
+                        temporal_regex = "("+temporal_regex+value+")"
 
                         self.regex.append(temporal_regex)
 
                     else:
-                        self.regex.append("'"+str(ord(key_without_apostrophe))+"'")
+                        temporal_regex = "(("+"'"+str(ord(key_without_apostrophe))+"'"+")"+value+")"
+                        self.regex.append(temporal_regex)
 
                 else:
                     print("\nError: Token ID ('"+key+"') no encontrado den el diccionario de 'let'. Saltando linea. \n")

@@ -1,0 +1,34 @@
+(* Introducir cualquier header aqui *)
+{print("Lectura iniciada")
+print("Lectura iniciada 2")
+a = 55
+print(a)
+}
+
+	let delim = [' ''\t''\n']
+ let ws = delim+ 
+let letter = ['A'-'Z''a'-'z']
+
+letshfads digit = ['0123456789']
+   let id = letter (letter | digit)*
+
+rulefsd tokens = 
+    ws  {return "WHITESPACE"}
+  
+	| id  {  
+				print("Hola!")
+				return "ID" if token != "abc" else "ID:ABC"
+	}
+  
+	| '+'       { return "PLUS" }
+
+  	| '*'    { return "TIMES" }
+  	| '('       { return "LPAREN" }
+  	| ')'       { return "RPAREN" }
+	| '*)'		 { return "STARTCOMMENT" }
+
+(* Introducir cualquier trailer aqui *)
+{
+print("Lectura finalizada")
+print("Stefano Aragoni")
+}

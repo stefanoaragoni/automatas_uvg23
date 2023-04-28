@@ -9,11 +9,11 @@ let digits = digit+
 let number = digits(.digits)?('E'['+''-']?digits)?
 
 rule tokens = 
-    ws        { return WHITESPACE }               (* Cambie por una acción válida, que devuelva el token *)
-  | number    { return NUMBER }
-  | '+'       { return PLUS }
-  | '*'       { return TIMES }
-  | '('       { return LPAREN }
-  | ')'       { return RPAREN }
+    ws        { return "WHITESPACE" }               (* Cambie por una acción válida, que devuelva el token *)
+  | number    { return "NUMBER" }
+  | '+'       { return "PLUS" }
+  | '*'       { return "TIMES" }
+  | '('       { return "LPAREN" }
+  | ')'       { return "RPAREN" }
 
 (* Introducir cualquier trailer aqui *)

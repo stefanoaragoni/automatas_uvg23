@@ -100,7 +100,8 @@ class AFD_Directo(Automata):
             estado_temp = Estado(dstate[0])
 
             if uid_hashtag in dstate[1][0].Elementos:
-                self.EstadosFinales.AddItem(estado_temp)
+                #self.EstadosFinales.AddItem(estado_temp)
+                continue
 
             if dstate[0] == 0:
                 self.estado_inicial = estado_temp
@@ -113,6 +114,10 @@ class AFD_Directo(Automata):
             estado_destino = self.GetItem(transicion[1])
             simbolo = transicion[2]
 
-            self.transiciones.append(Transicion(estado_origen, estado_destino, simbolo))
+            if '#' in simbolo.c_id:
+                estado_origen.token = simbolo
+                self.EstadosFinales.AddItem(estado_origen)
+            else:
+                self.transiciones.append(Transicion(estado_origen, estado_destino, simbolo))
 
         
