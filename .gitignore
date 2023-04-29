@@ -4,4 +4,6 @@
 !*.py
 !*.txt
 !/yalex
+!/scanner
+!/NotInUse
 __pycache__/
