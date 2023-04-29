@@ -10,6 +10,8 @@ def tokens(regla, token):
 		return "WHITESPACE"
 	if regla.replace("'", "").replace('"', "") == 'id':
 		return "ID"
+	if regla.replace("'", "").replace('"', "") == 'if':
+		return "IF"
 	if regla.replace("'", "").replace('"', "") == '+':
 		return "PLUS"
 	if regla.replace("'", "").replace('"', "") == '*':
