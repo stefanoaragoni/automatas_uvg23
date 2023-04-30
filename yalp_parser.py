@@ -4,6 +4,7 @@ from postfix import Postfix
 from arbol import Arbol
 from graph import Graph
 from prettytable import PrettyTable
+from graphviz import Digraph
 import numpy as np
 
 class YalParser():
@@ -23,6 +24,8 @@ class YalParser():
 
         self.parse()
         self.lr0()
+
+        self.automaton()
 
     def parse(self):
 
@@ -115,7 +118,11 @@ class YalParser():
                     temporal_token += char
 
                         
-                if temporal_token == "%token":
+                if temporal_token == "%token" or temporal_token.lower() == "%token":
+                    
+                    if temporal_token != "%token":
+                        print("Error Lexico la linea", i+1, "de", self.file + ": Se esperaba que %token estuviera en minusculas.")
+
                     indicator = "token"
                     temporal_token = ""
 
@@ -217,6 +224,7 @@ class YalParser():
     def lr0(self):
         inicial = self.productions[0][0]
         self.productions.insert(0, [inicial+"'", inicial])
+        self.end_item = [inicial+"'", inicial+' •']
 
         inicial = [0, [[inicial+"'", '• '+inicial]]]
         self.contador_item = 1
@@ -231,18 +239,28 @@ class YalParser():
                 if np.array_equal(np.array(goto[1], dtype=object), np.array([], dtype=object)) == False:
 
                     inside_C = False
+                    found_item = None
 
                     for k in C:
 
                         if np.array_equal(np.array(goto[1:][0], dtype=object), np.array(k[1:][0], dtype=object)) == True:
                             inside_C = True
+                            found_item = k[0]
 
                     if inside_C == False:
                         C.append(goto)
                         self.transiciones.append([i[0], j, self.contador_item])
                         self.contador_item += 1
-                        
+                    else:
+                        self.transiciones.append([i[0], j, found_item])
+
+        for element in C:
+            for item in element[1]:
+                if item[1] == self.end_item[1]:
+                    self.transiciones.append([element[0], "$", "Aceptar"])
+
         print("\BREAKPOINT - LR0")
+        self.C = C
 
     def closure(self, I):
         id_item = I[0]
@@ -302,6 +320,51 @@ class YalParser():
                 new_Items[1].append([I_item[0],current_prod_copy])
 
         return self.closure(new_Items)
+    
+    def automaton(self):
+        dot = Digraph()
+        dot.attr(rankdir="LR")
+
+        dot.attr(fontsize='20')
+        nodes_array = []
+    
+        for C in self.C:
+            id = C[0]
+            items = C[1:][0]
+            number_items = C[2]
+            items_preClosure = items[0:number_items]
+            items_postClosure = items[number_items:]
+
+            # Create box styled nodes. Each node should include ID in red, items_preClosure in blue and items_postClosure in green
+            node = "i"+str(id)
+            node += "\n-----------\n"
+            for item in items_preClosure:
+                node += item[0] + " => " +item[1] + "\n"
+            node += "-----------\n"
+            for item in items_postClosure:
+                node += item[0] + " => " +item[1] + "\n"
+
+            nodes_array.append([id, node])
+
+        for transition in self.transiciones:
+            origin = transition[0]
+            destination = transition[2]
+
+            for node in nodes_array:
+                if node[0] == origin:
+                    origin = node[1]
+                if node[0] == destination:
+                    destination = node[1]
+
+            if str(destination) == "4":
+                print("BREAKPOINT")
+
+            dot.edge(str(origin), str(destination), transition[1])
+
+        # Render graph
+        dot.node_attr.update({'shape': 'box'})
+        dot.render(view=True, format='pdf')
 
 
-YalParser = YalParser("./yalex/slr-1.yalp")
+
+YalParser = YalParser("./yalex/test.yalp")

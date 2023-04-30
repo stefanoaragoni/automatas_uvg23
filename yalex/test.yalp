@@ -1,16 +1,16 @@
 /* definicion test */
-%token + * ( ) ID
+%TOKEN + * ( ) ID
 
 %%
 
 /* producciones */
-E : 
-    E + T | T ;
+e : 
+    e + t | t ;
 ;
-T :
-    T * F | F ;
-F :
-    ( E ) | ID ;
+t :
+    t * f | f ;
+f :
+    ( e ) | ID ;
     
 /* FIN */
 
