@@ -1,20 +1,16 @@
 /* definicion test */
-%token TOKEN1
-     %token TOKEN2 TOKEN3
- %tokens TOKEN4
-IGNORE TOKEN4
-IGNORE TOKEN5
-%token TOKEN5
+%token + * ( ) ID
 
 %%
 
 /* producciones */
-produccion1 : 
-    produccion1 TOKEN1 produccion2
-    | produccion2
+E : 
+    E + T | T ;
 ;
-produccion2 :
-    produccion2 TOKEN2 TOKEN3 | TOKEN3 ;
-
+T :
+    T * F | F ;
+F :
+    ( E ) | ID ;
+    
 /* FIN */
 

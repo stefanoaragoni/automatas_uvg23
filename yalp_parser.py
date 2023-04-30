@@ -4,6 +4,7 @@ from postfix import Postfix
 from arbol import Arbol
 from graph import Graph
 from prettytable import PrettyTable
+import numpy as np
 
 class YalParser():
     def __init__(self, file):
@@ -21,6 +22,7 @@ class YalParser():
         self.productions = []
 
         self.parse()
+        self.lr0()
 
     def parse(self):
 
@@ -200,13 +202,106 @@ class YalParser():
             if new_temporal_production != "":
                 self.productions.append([name, new_temporal_production.strip()])
 
-            print("\BREAKPOINT - PRODUCCIONES LIMPIAS")
+        print("\BREAKPOINT - PRODUCCIONES LIMPIAS")
 
+        self.symbol = []
+
+        for production in self.productions:
+            if production[0] not in self.symbol:
+                self.symbol.append(production[0])
+
+        for token in self.tokens:
+            if token[0] not in self.symbol:
+                self.symbol.append(token[0])
+
+    def lr0(self):
+        inicial = self.productions[0][0]
+        self.productions.insert(0, [inicial+"'", inicial])
+
+        inicial = [0, [[inicial+"'", '• '+inicial]]]
+        self.contador_item = 1
+        self.transiciones = []
+
+        C = [self.closure(inicial)]
+
+        for i in C:
+            for j in self.symbol:
+                goto = self.goto(i, j)
+
+                if np.array_equal(np.array(goto[1], dtype=object), np.array([], dtype=object)) == False:
+
+                    inside_C = False
+
+                    for k in C:
+
+                        if np.array_equal(np.array(goto[1:][0], dtype=object), np.array(k[1:][0], dtype=object)) == True:
+                            inside_C = True
+
+                    if inside_C == False:
+                        C.append(goto)
+                        self.transiciones.append([i[0], j, self.contador_item])
+                        self.contador_item += 1
+                        
+        print("\BREAKPOINT - LR0")
+
+    def closure(self, I):
+        id_item = I[0]
+        J = I[1:][0]
+
+        size_preclosure = len(J)
+
+        analized = []
+
+        for item in J:
+
+            current_prod = item[1].split(" ")
+            index = current_prod.index("•")
+
+            if index+1 >= len(current_prod):
+                continue
+
+            if current_prod[index+1] in self.tokens:
+                continue
+
+            to_analize = current_prod[current_prod.index("•")+1]
+        
+            for prod in self.productions:
+
+                if prod[0] == to_analize:
+                    if prod[0] not in analized:
+                        current_prod_copy = [to_analize, "• "+prod[1]]
+                        J.append(current_prod_copy)
+
+            analized.append(to_analize)
+
+        return [id_item, J, size_preclosure]
+
+    def goto(self, I, X):
+
+        new_Items = [self.contador_item, []]
+        I = I[1:][0]
+        
+        for I_item in I:
+            current_prod = I_item[1].split(" ")
+            index = current_prod.index("•")
+
+            if index+1 >= len(current_prod):
+                continue
+
+            to_analize = current_prod[current_prod.index("•")+1]
+
+            if to_analize == X:
+                current_prod_copy = current_prod.copy()
+                index = current_prod_copy.index("•")
                 
+                current_prod_copy.insert(index+2, "•")
+                current_prod_copy.pop(index)
+
+                current_prod_copy = " ".join(current_prod_copy)
+
+                new_Items[1].append([I_item[0],current_prod_copy])
+
+        return self.closure(new_Items)
 
 
-    
-                    
-
-
-YalParser = YalParser("./yalex/test.yalp")
+YalParser = YalParser("./yalex/slr-1.yalp")
