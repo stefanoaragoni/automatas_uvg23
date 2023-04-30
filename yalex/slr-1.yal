@@ -11,7 +11,6 @@ let id = letter(letter|digit)*
 rule tokens = 
     ws        { return "WHITESPACE"}
   | id        { return "ID" }               (* Cambie por una acción válida, que devuelva el token *)
-  | "if"        { return "IF" }               
   | '+'       { return "PLUS" }
   | '*'       { return "TIMES" }
   | '('       { return "LPAREN" }

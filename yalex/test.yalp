@@ -1,0 +1,20 @@
+/* definicion test */
+%token TOKEN1
+     %token TOKEN2 TOKEN3
+ %tokens TOKEN4
+IGNORE TOKEN4
+IGNORE TOKEN5
+%token TOKEN5
+
+%%
+
+/* producciones */
+produccion1 : 
+    produccion1 TOKEN1 produccion2
+    | produccion2
+;
+produccion2 :
+    produccion2 TOKEN2 TOKEN3 | TOKEN3 ;
+
+/* FIN */
+

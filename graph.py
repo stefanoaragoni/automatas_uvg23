@@ -1,6 +1,5 @@
 from graphviz import Digraph
 from automata import Automata
-from afn import AFN
 
 def Graph(automata, regex, type):
     dot = Digraph()
