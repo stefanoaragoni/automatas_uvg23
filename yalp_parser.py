@@ -6,16 +6,20 @@ from prettytable import PrettyTable
 from graphviz import Digraph
 import numpy as np
 import importlib
+from yal_parser import YalParser
 
-class YalParser(Automata):
+class YalPParser(Automata):
     def __init__(self, fileYalpar, fileYalex):
 
         # Inicializa la clase padre (Automata)
         super().__init__()
 
+        print("\n-----")
+
         self.file = fileYalpar
-        module = importlib.import_module(fileYalex)
-        self.LabD = module.simulacion()
+        
+        yal = YalParser(fileYalex)
+        self.YalexTokens = yal.tokens
 
         # Contiene los caracteres que se pueden usar en la expresión regular
         self.charset = ["[", "]", "-"]
@@ -31,6 +35,8 @@ class YalParser(Automata):
 
         self.lr0()
         self.automaton()
+
+        print("\n-----\n")
 
     def parse(self):
 
@@ -100,7 +106,7 @@ class YalParser(Automata):
                     if char != "\n" or char != "\t":
                         temporal_line += char
 
-        print("\BREAKPOINT - SEPARACION DE TOKENS Y PRODUCCIONES (DIRTY)")
+        # print("\BREAKPOINT - SEPARACION DE TOKENS Y PRODUCCIONES (DIRTY)")
 
         # LIMPIEZA DE TOKENS
         for i, token in enumerate(tokens_array):
@@ -126,7 +132,7 @@ class YalParser(Automata):
                 if temporal_token == "%token" or temporal_token.lower() == "%token":
                     
                     if temporal_token != "%token":
-                        print("Error Lexico la linea", i+1, "de", self.file + ": Se esperaba que %token estuviera en minusculas.")
+                        print("\nError Lexico la linea", i+1, "de", self.file + ": Se esperaba que %token estuviera en minusculas.")
 
                     indicator = "token"
                     temporal_token = ""
@@ -134,7 +140,7 @@ class YalParser(Automata):
                     if tokens_array[i][j+1] == " ":
                         continue
                     else:
-                        print("Error Lexico la linea", i+1, "de", self.file + ": Se esperaba un espacio después de %token.")
+                        print("\nError Lexico la linea", i+1, "de", self.file + ": Se esperaba un espacio después de %token.")
                         error_indicator = True
 
                 elif temporal_token == "IGNORE":
@@ -144,7 +150,7 @@ class YalParser(Automata):
                     if tokens_array[i][j+1] == " ":
                         continue
                     else:
-                        print("Error Lexico la linea", i+1, "de", self.file + ": Se esperaba un espacio después de IGNORE.")
+                        print("\nError Lexico la linea", i+1, "de", self.file + ": Se esperaba un espacio después de IGNORE.")
                         error_indicator = True
 
             if temporal_token != "":
@@ -164,12 +170,12 @@ class YalParser(Automata):
                             found = True
 
                     if found == False:
-                        print("Error Semantico la linea", i+1, "de", self.file + ": El token", token, "no ha sido declarado. No se puede 'IGNORE'.")
+                        print("\nError Semantico la linea", i+1, "de", self.file + ": El token", token, "no ha sido declarado. No se puede 'IGNORE'.")
 
         for token_element in self.tokens:
             token_element[0] = token_element[0].upper()
 
-        print("\BREAKPOINT - TOKENS LIMPIOS")
+        # print("\BREAKPOINT - TOKENS LIMPIOS")
 
         # LIMPIEZA DE PRODUCCIONES
         for i, production in enumerate(productions_array):
@@ -214,7 +220,7 @@ class YalParser(Automata):
             if new_temporal_production != "":
                 self.productions.append([name, new_temporal_production.strip()])
 
-        print("\BREAKPOINT - PRODUCCIONES LIMPIAS")
+        # print("\BREAKPOINT - PRODUCCIONES LIMPIAS")
 
         self.Simbolos.Elementos = []
 
@@ -228,7 +234,40 @@ class YalParser(Automata):
 
     def clean(self):
         to_delete = []
+        new_Tokens = []
 
+        for name, token in self.YalexTokens.items():
+            new_name = ""
+
+            for char in token:
+                if char == '"' or char == "'":
+                    continue
+                elif char != " ":
+                    new_name += char
+                else:
+                    new_name = ""
+
+            new_Tokens.append(new_name)
+
+        for token in self.tokens:
+            if token[0] not in new_Tokens:
+                print("\nError Semantico: El token", token[0], "encontrado en .Yalp no ha sido declarado en .Yalex. Ignorando...")
+                to_delete.append(token)
+
+        # for token in new_Tokens:
+        #     found = False
+
+        #     for element in self.tokens:
+        #         if token == element[0]:
+        #             found = True
+
+        #     if found == False:
+        #         print("Error Semantico: El token", token, "encontrado en .Yalex no ha sido declarado en .Yalp. Ignorando...")
+
+        for token in to_delete:
+            self.tokens.remove(token)   
+
+        to_delete = []
         for production in self.productions:
             words_found = set()
 
@@ -254,7 +293,7 @@ class YalParser(Automata):
                             break
 
                     if found == False:
-                        print("Error Semantico: El token", word, "no ha sido declarado. Ignorando...")
+                        print("\nError Semantico: El token", word, "no ha sido declarado. Ignorando...")
                         to_delete.append(production)
 
                 elif word.islower():
@@ -266,17 +305,17 @@ class YalParser(Automata):
                             break
 
                     if found == False:
-                        print("Error Semantico: El simbolo no terminal", word, "no ha sido declarado. Ignorando...")
+                        print("\nError Semantico: El simbolo no terminal", word, "no ha sido declarado. Ignorando...")
                         to_delete.append(production)
 
                 else:
-                    print("Error Semantico: El simbolo", word, "no ha sido declarado. Ignorando...")
+                    print("\nError Semantico: El simbolo", word, "no ha sido declarado. Ignorando...")
                     to_delete.append(production)
 
         for production in to_delete:
             self.productions.remove(production)
             
-        print("\BREAKPOINT - DETECCION DE ERRORES")
+        # print("\BREAKPOINT - DETECCION DE ERRORES")
 
     def lr0(self):
         inicial = self.productions[0][0]
@@ -340,7 +379,7 @@ class YalParser(Automata):
                     found = True
                     break
 
-        print("\BREAKPOINT - LR0")
+        # print("\BREAKPOINT - LR0")
 
     def closure(self, I):
         id_item = I[0]
@@ -437,9 +476,6 @@ class YalParser(Automata):
                 if node[0] == destination:
                     destination = node[1]
 
-            if str(destination) == "4":
-                print("BREAKPOINT")
-
             dot.edge(str(origin), str(destination), transition.el_simbolo)
 
         # Render graph
@@ -448,4 +484,4 @@ class YalParser(Automata):
 
 
 
-YalParser = YalParser("./yalex/test.yalp", "slr-1")
+YalParser = YalPParser("./yalex/slr-1.yalp", "./yalex/slr-1.yal")
