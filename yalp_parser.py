@@ -1,17 +1,21 @@
-from set import Set
 from simbolo import Simbolo
-from postfix import Postfix
-from arbol import Arbol
-from graph import Graph
+from transicion import Transicion
+from automata import Automata
+from estado import Estado
 from prettytable import PrettyTable
 from graphviz import Digraph
 import numpy as np
+import importlib
 
-class YalParser():
-    def __init__(self, file):
+class YalParser(Automata):
+    def __init__(self, fileYalpar, fileYalex):
 
-        self.file = file
-        self.regex = ""
+        # Inicializa la clase padre (Automata)
+        super().__init__()
+
+        self.file = fileYalpar
+        module = importlib.import_module(fileYalex)
+        self.LabD = module.simulacion()
 
         # Contiene los caracteres que se pueden usar en la expresión regular
         self.charset = ["[", "]", "-"]
@@ -23,8 +27,9 @@ class YalParser():
         self.productions = []
 
         self.parse()
-        self.lr0()
+        self.clean()
 
+        self.lr0()
         self.automaton()
 
     def parse(self):
@@ -211,15 +216,67 @@ class YalParser():
 
         print("\BREAKPOINT - PRODUCCIONES LIMPIAS")
 
-        self.symbol = []
+        self.Simbolos.Elementos = []
 
         for production in self.productions:
-            if production[0] not in self.symbol:
-                self.symbol.append(production[0])
+            if production[0] not in self.Simbolos.Elementos:
+                self.Simbolos.Elementos.append(production[0])
 
         for token in self.tokens:
-            if token[0] not in self.symbol:
-                self.symbol.append(token[0])
+            if token[0] not in self.Simbolos.Elementos:
+                self.Simbolos.Elementos.append(token[0])
+
+    def clean(self):
+        to_delete = []
+
+        for production in self.productions:
+            words_found = set()
+
+            temp_word = ""
+            for char in production[1]:
+                if char != " " and char != "|":
+                    temp_word += char
+                else:
+                    words_found.add(temp_word)
+                    temp_word = ""
+
+            words_found.add(temp_word)
+            temp_word = ""
+
+            for word in words_found:
+
+                if word.isupper() == True or not any(c.isalpha() for c in word):
+                    found = False
+
+                    for token in self.tokens:
+                        if word == token[0]:
+                            found = True
+                            break
+
+                    if found == False:
+                        print("Error Semantico: El token", word, "no ha sido declarado. Ignorando...")
+                        to_delete.append(production)
+
+                elif word.islower():
+                    found = False
+
+                    for symbol in self.Simbolos.Elementos:
+                        if word == symbol:
+                            found = True
+                            break
+
+                    if found == False:
+                        print("Error Semantico: El simbolo no terminal", word, "no ha sido declarado. Ignorando...")
+                        to_delete.append(production)
+
+                else:
+                    print("Error Semantico: El simbolo", word, "no ha sido declarado. Ignorando...")
+                    to_delete.append(production)
+
+        for production in to_delete:
+            self.productions.remove(production)
+            
+        print("\BREAKPOINT - DETECCION DE ERRORES")
 
     def lr0(self):
         inicial = self.productions[0][0]
@@ -227,14 +284,28 @@ class YalParser():
         self.end_item = [inicial+"'", inicial+' •']
 
         inicial = [0, [[inicial+"'", '• '+inicial]]]
+
         self.contador_item = 1
         self.transiciones = []
-
         C = [self.closure(inicial)]
 
+        items = C[0][1:][0]
+        number_items = C[0][2]
+        items_preClosure = items[0:number_items]
+        items_postClosure = items[number_items:]
+
+        start = Estado(id=0, items_pre=items_preClosure, items_post=items_postClosure)
+        self.Estados.AddItem(start)
+        self.estado_inicial = start
+
         for i in C:
-            for j in self.symbol:
+            for j in self.Simbolos.Elementos:
                 goto = self.goto(i, j)
+
+                items = goto[1:][0]
+                number_items = goto[2]
+                items_preClosure = items[0:number_items]
+                items_postClosure = items[number_items:]
 
                 if np.array_equal(np.array(goto[1], dtype=object), np.array([], dtype=object)) == False:
 
@@ -249,18 +320,27 @@ class YalParser():
 
                     if inside_C == False:
                         C.append(goto)
-                        self.transiciones.append([i[0], j, self.contador_item])
+                        self.Estados.AddItem(Estado(id=goto[0], items_pre=items_preClosure, items_post=items_postClosure))
+                        self.transiciones.append(Transicion(i[0], self.contador_item,  j))
                         self.contador_item += 1
                     else:
-                        self.transiciones.append([i[0], j, found_item])
+                        self.transiciones.append(Transicion(i[0], found_item,  j))
 
-        for element in C:
-            for item in element[1]:
+        found = False
+        for element in self.Estados.Elementos:
+            if found == True:
+                break
+
+            for item in element.items_pre:
                 if item[1] == self.end_item[1]:
-                    self.transiciones.append([element[0], "$", "Aceptar"])
+                    self.transiciones.append(Transicion(element.id, "Aceptar", "$"))
+                    last = Estado(id="Aceptar")
+                    self.Estados.AddItem(last)
+                    self.EstadosFinales.AddItem(last)
+                    found = True
+                    break
 
         print("\BREAKPOINT - LR0")
-        self.C = C
 
     def closure(self, I):
         id_item = I[0]
@@ -328,12 +408,13 @@ class YalParser():
         dot.attr(fontsize='20')
         nodes_array = []
     
-        for C in self.C:
-            id = C[0]
-            items = C[1:][0]
-            number_items = C[2]
-            items_preClosure = items[0:number_items]
-            items_postClosure = items[number_items:]
+        for C in self.Estados.Elementos:
+            id = C.id
+            items_preClosure = C.items_pre
+            items_postClosure = C.items_post
+
+            if id == "Aceptar":
+                continue
 
             # Create box styled nodes. Each node should include ID in red, items_preClosure in blue and items_postClosure in green
             node = "i"+str(id)
@@ -347,8 +428,8 @@ class YalParser():
             nodes_array.append([id, node])
 
         for transition in self.transiciones:
-            origin = transition[0]
-            destination = transition[2]
+            origin = transition.estado_origen
+            destination = transition.estado_destino
 
             for node in nodes_array:
                 if node[0] == origin:
@@ -359,7 +440,7 @@ class YalParser():
             if str(destination) == "4":
                 print("BREAKPOINT")
 
-            dot.edge(str(origin), str(destination), transition[1])
+            dot.edge(str(origin), str(destination), transition.el_simbolo)
 
         # Render graph
         dot.node_attr.update({'shape': 'box'})
@@ -367,4 +448,4 @@ class YalParser():
 
 
 
-YalParser = YalParser("./yalex/test.yalp")
+YalParser = YalParser("./yalex/test.yalp", "slr-1")
