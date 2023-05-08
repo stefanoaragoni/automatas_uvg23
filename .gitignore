@@ -3,5 +3,8 @@
 !*.yal
 !*.py
 !*.txt
+!*.yalp
 !/yalex
+!/scanner
+!/NotInUse
 __pycache__/

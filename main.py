@@ -3,10 +3,7 @@ from estado import Estado
 from simbolo import Simbolo
 from transicion import Transicion
 from automata import Automata
-from afn import AFN
-from afd_subconjuntos import AFD_Subconjuntos
 from afd_directo import AFD_Directo
-from afd_minimizacion import AFD_Minimizacion
 from postfix import Postfix
 from arbol import Arbol
 from graph import Graph

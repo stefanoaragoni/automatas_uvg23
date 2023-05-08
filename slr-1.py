@@ -7,7 +7,7 @@ from afd_directo import AFD_Directo
 #-------- TOKENS
 def tokens(regla, token):
 	if regla.replace("'", "").replace('"', "") == 'ws':
-		return "WHITESPACE"
+		return "WS"
 	if regla.replace("'", "").replace('"', "") == 'id':
 		return "ID"
 	if regla.replace("'", "").replace('"', "") == '+':
@@ -45,5 +45,3 @@ def simulacion():
 	print(table)
 
 	return resultado
-
-simulacion()

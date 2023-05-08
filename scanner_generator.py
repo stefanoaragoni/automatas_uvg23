@@ -99,7 +99,6 @@ class scannerGenerator:
 
             archivo.write("\n\treturn resultado\n")
 
-            archivo.write("\nsimulacion()\n")
 
 
         
