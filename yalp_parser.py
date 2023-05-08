@@ -328,6 +328,7 @@ class YalPParser(Automata):
 
     def lr0(self):
         inicial = self.productions[0][0]
+        self.inicial_token = inicial
         self.productions.insert(0, [inicial+"'", inicial])
         self.end_item = [inicial+"'", inicial+' •']
 
@@ -505,7 +506,74 @@ class YalPParser(Automata):
         print(self.first)
 
     def follow_calc(self):
-        pass
+        self.follow[self.inicial_token] = ["$"]
+
+        non_terminals = []
+        for production in self.productionsOriginal:
+            non_terminals.append(production[0])
+
+        for production in self.productionsOriginal:
+
+            prod_original = production[0]
+            prod = production[1].split(" ")
+
+            for i in range(len(prod)):
+
+                # check if there is a non-terminal surrounded by non-terminals on both sides
+                if i+1 < len(prod) and i-1 >= 0 and prod[i-1] in non_terminals and prod[i] in non_terminals and prod[i+1] in non_terminals:
+
+                    firstB = self.first[prod[i+1]]
+                    for item in firstB:
+                        if item == 'ε':
+                            # delete epsilon
+                            firstB.remove(item)
+
+                    if prod[i] in self.follow.keys():
+                        for item in firstB:
+                            if item not in self.follow[prod[i]]:
+                                self.follow[prod[i]].append(item)
+                    else:
+                        self.follow[prod[i]] = firstB
+
+
+        for production in self.productionsOriginal:
+
+            prod_original = production[0]
+            prod = production[1].split(" ")
+
+            for i in range(len(prod)):
+
+                # check if there is a non-terminal surrounded by
+                if i+1 < len(prod) and i-1 >= 0 and prod[i-1] in non_terminals and prod[i] in non_terminals and prod[i+1] in non_terminals:
+                    firstB = self.first[prod[i+1]]
+                    epsilon_check = False
+                    for item in firstB:
+                        if item == 'ε':
+                            epsilon_check = True
+
+                    if epsilon_check == True:
+                        if prod[i] in self.follow.keys() and prod_original in self.follow.keys():
+                            for item in self.follow[prod_original]:
+                                if item not in self.follow[prod[i]]:
+                                    self.follow[prod[i]].append(item)
+                        elif prod[i] not in self.follow.keys() and prod_original in self.follow.keys():
+                            self.follow[prod[i]] = self.follow[prod_original]
+
+                        else:
+                            self.follow[prod[i]] = []
+
+                elif i+1 > len(prod) and i-1 >= 0 and prod[i-1] in non_terminals and prod[i] in non_terminals:
+                    if prod[i] in self.follow.keys() and prod_original in self.follow.keys():
+                        for item in self.follow[prod_original]:
+                            if item not in self.follow[prod[i]]:
+                                self.follow[prod[i]].append(item)
+                    elif prod[i] not in self.follow.keys() and prod_original in self.follow.keys():
+                        self.follow[prod[i]] = self.follow[prod_original]
+
+                    else:
+                        self.follow[prod[i]] = []
+
+        print(self.follow)
 
     def automaton(self):
         dot = Digraph()
