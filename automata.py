@@ -9,6 +9,8 @@ class Automata:
         self.Simbolos = Set()
         self.estado_inicial = None
         self.transiciones = []
+        self.first = {}
+        self.follow = {}
 
     def GetItem(self, id):
         for estado in self.Estados.Elementos:

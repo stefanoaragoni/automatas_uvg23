@@ -7,6 +7,7 @@ from graphviz import Digraph
 import numpy as np
 import importlib
 from yal_parser import YalParser
+from set import Set
 
 class YalPParser(Automata):
     def __init__(self, fileYalpar, fileYalex):
@@ -34,6 +35,10 @@ class YalPParser(Automata):
         self.clean()
 
         self.lr0()
+
+        self.first_calc()
+        self.follow_calc()
+
         self.automaton()
 
         print("\n-----\n")
@@ -222,7 +227,9 @@ class YalPParser(Automata):
 
         # print("\BREAKPOINT - PRODUCCIONES LIMPIAS")
 
-        self.Simbolos.Elementos = []
+        self.Simbolos.Elementos = ['ε']
+
+        self.productionsOriginal = self.productions.copy()
 
         for production in self.productions:
             if production[0] not in self.Simbolos.Elementos:
@@ -266,6 +273,8 @@ class YalPParser(Automata):
 
         for token in to_delete:
             self.tokens.remove(token)   
+
+        self.tokens.append(["ε", 0])
 
         to_delete = []
         for production in self.productions:
@@ -439,7 +448,65 @@ class YalPParser(Automata):
                 new_Items[1].append([I_item[0],current_prod_copy])
 
         return self.closure(new_Items)
-    
+
+
+    def first_calc(self):
+            
+        production_copy = self.productionsOriginal.copy()
+
+        for production in production_copy:
+
+            name_prod = production[0]
+            prod = production[1].split(" ")
+
+            for token in self.tokens:
+                if prod[0] == token[0]:
+                    if self.first == {}:
+                        self.first[name_prod] = [prod[0]]
+                    else:
+                        if name_prod in self.first.keys():
+                            elements = self.first[name_prod]
+                            if prod[0] not in elements:
+                                self.first[name_prod].append(prod[0])
+                        else:
+                            self.first[name_prod] = [prod[0]]
+                        
+
+            same_prod = Set()
+            same_prod.AddItem(name_prod)
+            same_prod.AddItem(prod[0])
+
+            for prod2 in production_copy:
+                if prod2[0] == same_prod.returnLastItem():
+                    result = prod2[1].split(" ")[0]
+
+                    reached = False
+                    for token in self.tokens:
+                        if result == token[0]:
+
+                            for item in same_prod.Elementos:
+
+                                if self.first == {}:
+                                    self.first[item] = [result]
+                                else:
+                                    if item in self.first.keys():
+                                        elements = self.first[item]
+                                        if result not in elements:
+                                            self.first[item].append(result)
+                                    else:
+                                        self.first[item] = [result]
+                                        
+                                    
+                                reached = True
+
+                    if reached == False:
+                        same_prod.AddItem(result)
+            
+        print(self.first)
+
+    def follow_calc(self):
+        pass
+
     def automaton(self):
         dot = Digraph()
         dot.attr(rankdir="LR")
