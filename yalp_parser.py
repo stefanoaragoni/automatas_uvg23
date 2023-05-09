@@ -450,60 +450,69 @@ class YalPParser(Automata):
 
         return self.closure(new_Items)
 
+    def first_calc(self, value = None):
 
-    def first_calc(self):
-            
-        production_copy = self.productionsOriginal.copy()
+        if value == None or self.first == {}:
 
-        for production in production_copy:
+            production_copy = self.productionsOriginal.copy()
 
-            name_prod = production[0]
-            prod = production[1].split(" ")
+            for production in production_copy:
 
-            for token in self.tokens:
-                if prod[0] == token[0]:
-                    if self.first == {}:
-                        self.first[name_prod] = [prod[0]]
-                    else:
-                        if name_prod in self.first.keys():
-                            elements = self.first[name_prod]
-                            if prod[0] not in elements:
-                                self.first[name_prod].append(prod[0])
-                        else:
+                name_prod = production[0]
+                prod = production[1].split(" ")
+
+                for token in self.tokens:
+                    if prod[0] == token[0]:
+                        if self.first == {}:
                             self.first[name_prod] = [prod[0]]
-                        
+                        else:
+                            if name_prod in self.first.keys():
+                                elements = self.first[name_prod]
+                                if prod[0] not in elements:
+                                    self.first[name_prod].append(prod[0])
+                            else:
+                                self.first[name_prod] = [prod[0]]
+                            
 
-            same_prod = Set()
-            same_prod.AddItem(name_prod)
-            same_prod.AddItem(prod[0])
+                same_prod = Set()
+                same_prod.AddItem(name_prod)
+                same_prod.AddItem(prod[0])
 
-            for prod2 in production_copy:
-                if prod2[0] == same_prod.returnLastItem():
-                    result = prod2[1].split(" ")[0]
+                for prod2 in production_copy:
+                    if prod2[0] == same_prod.returnLastItem():
+                        result = prod2[1].split(" ")[0]
 
-                    reached = False
-                    for token in self.tokens:
-                        if result == token[0]:
+                        reached = False
+                        for token in self.tokens:
+                            if result == token[0]:
 
-                            for item in same_prod.Elementos:
+                                for item in same_prod.Elementos:
 
-                                if self.first == {}:
-                                    self.first[item] = [result]
-                                else:
-                                    if item in self.first.keys():
-                                        elements = self.first[item]
-                                        if result not in elements:
-                                            self.first[item].append(result)
-                                    else:
+                                    if self.first == {}:
                                         self.first[item] = [result]
+                                    else:
+                                        if item in self.first.keys():
+                                            elements = self.first[item]
+                                            if result not in elements:
+                                                self.first[item].append(result)
+                                        else:
+                                            self.first[item] = [result]
+                                            
                                         
-                                    
-                                reached = True
+                                    reached = True
 
-                    if reached == False:
-                        same_prod.AddItem(result)
+                        if reached == False:
+                            same_prod.AddItem(result)
+                
+            print(self.first)
+
+        if value != None:
+            for token in self.tokens:
+                if value == token[0]:
+                    return [value]
             
-        print(self.first)
+            if value in self.first.keys():
+                return self.first[value]
 
     def follow_calc(self):
         self.follow[self.inicial_token] = ["$"]
@@ -520,9 +529,9 @@ class YalPParser(Automata):
             for i in range(len(prod)):
 
                 # check if there is a non-terminal surrounded by non-terminals on both sides
-                if i+1 < len(prod) and i-1 >= 0 and prod[i-1] in non_terminals and prod[i] in non_terminals and prod[i+1] in non_terminals:
+                if i+1 < len(prod) and prod[i] in non_terminals:
 
-                    firstB = self.first[prod[i+1]]
+                    firstB = self.first_calc(prod[i+1])
                     for item in firstB:
                         if item == 'ε':
                             # delete epsilon
@@ -544,14 +553,16 @@ class YalPParser(Automata):
             for i in range(len(prod)):
 
                 # check if there is a non-terminal surrounded by
-                if i+1 < len(prod) and i-1 >= 0 and prod[i-1] in non_terminals and prod[i] in non_terminals and prod[i+1] in non_terminals:
-                    firstB = self.first[prod[i+1]]
+                if i+1 < len(prod) and prod[i] in non_terminals:
+                    
+                    firstB = self.first_calc(prod[i+1])
                     epsilon_check = False
                     for item in firstB:
                         if item == 'ε':
                             epsilon_check = True
 
                     if epsilon_check == True:
+
                         if prod[i] in self.follow.keys() and prod_original in self.follow.keys():
                             for item in self.follow[prod_original]:
                                 if item not in self.follow[prod[i]]:
@@ -562,7 +573,7 @@ class YalPParser(Automata):
                         else:
                             self.follow[prod[i]] = []
 
-                elif i+1 > len(prod) and i-1 >= 0 and prod[i-1] in non_terminals and prod[i] in non_terminals:
+                elif i+1 >= len(prod) and prod[i] in non_terminals:
                     if prod[i] in self.follow.keys() and prod_original in self.follow.keys():
                         for item in self.follow[prod_original]:
                             if item not in self.follow[prod[i]]:
