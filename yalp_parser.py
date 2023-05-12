@@ -503,7 +503,12 @@ class YalPParser(Automata):
 
                         if reached == False:
                             same_prod.AddItem(result)
-                
+            
+            for token in self.tokens:
+                if token[0] == 'ε':
+                    continue
+                self.first[token[0]] = [token[0]]
+
             print(self.first)
 
         if value != None:

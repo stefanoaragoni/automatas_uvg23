@@ -11,8 +11,6 @@
 %token DIV
 %token NUMBER
 %token LPAREN RPAREN
-%token WHITESPACE
-IGNORE WHITESPACE
 
 %%
 
