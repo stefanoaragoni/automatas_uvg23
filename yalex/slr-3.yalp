@@ -1,7 +1,7 @@
 /* Configuración del parser para Gramática No.3 */
 /* Sigue la gramática SLR: */
 /* E → T + E | T */
-/* T → number * T | number | ( E ) */
+/* T → NUMBER * T | NUMBER | ( E ) */
 
 %token NUMBER
 %token PLUS
@@ -15,7 +15,7 @@ expression:
   | term
 ;
 term:
-    number TIMES term
-  | number
+    NUMBER TIMES term
+  | NUMBER
   | LPAREN expression RPAREN
 ;

@@ -509,7 +509,16 @@ class YalPParser(Automata):
                     continue
                 self.first[token[0]] = [token[0]]
 
-            print(self.first)
+            #print(self.first)
+
+            # PrettyTable self.first
+            table = PrettyTable()
+            table.field_names = ["Elemento", "First"]
+            for key in self.first.keys():
+                table.add_row([key, self.first[key]])
+            
+            print(table)
+
 
         if value != None:
             for token in self.tokens:
@@ -589,7 +598,15 @@ class YalPParser(Automata):
                     else:
                         self.follow[prod[i]] = []
 
-        print(self.follow)
+        #print(self.follow)
+
+        # prettyTable self.follow
+        table = PrettyTable()
+        table.field_names = ["Elemento", "Follow"]
+        for key in self.follow.keys():
+            table.add_row([key, self.follow[key]])
+
+        print(table)
 
     def automaton(self):
         dot = Digraph()
@@ -635,4 +652,4 @@ class YalPParser(Automata):
 
 
 
-YalParser = YalPParser("./yalex/slr-1.yalp", "./yalex/slr-1.yal")
+YalParser = YalPParser("./yalex/slr-4.yalp", "./yalex/slr-4.yal")
