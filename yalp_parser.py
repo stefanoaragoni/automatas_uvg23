@@ -7,6 +7,7 @@ from graphviz import Digraph
 import numpy as np
 import importlib
 from yal_parser import YalParser
+from set import Set
 
 class YalPParser(Automata):
     def __init__(self, fileYalpar, fileYalex):
@@ -34,6 +35,10 @@ class YalPParser(Automata):
         self.clean()
 
         self.lr0()
+
+        self.first_calc()
+        self.follow_calc()
+
         self.automaton()
 
         print("\n-----\n")
@@ -222,7 +227,9 @@ class YalPParser(Automata):
 
         # print("\BREAKPOINT - PRODUCCIONES LIMPIAS")
 
-        self.Simbolos.Elementos = []
+        self.Simbolos.Elementos = ['ε']
+
+        self.productionsOriginal = self.productions.copy()
 
         for production in self.productions:
             if production[0] not in self.Simbolos.Elementos:
@@ -266,6 +273,8 @@ class YalPParser(Automata):
 
         for token in to_delete:
             self.tokens.remove(token)   
+
+        self.tokens.append(["ε", 0])
 
         to_delete = []
         for production in self.productions:
@@ -319,6 +328,7 @@ class YalPParser(Automata):
 
     def lr0(self):
         inicial = self.productions[0][0]
+        self.inicial_token = inicial
         self.productions.insert(0, [inicial+"'", inicial])
         self.end_item = [inicial+"'", inicial+' •']
 
@@ -439,7 +449,165 @@ class YalPParser(Automata):
                 new_Items[1].append([I_item[0],current_prod_copy])
 
         return self.closure(new_Items)
-    
+
+    def first_calc(self, value = None):
+
+        if value == None or self.first == {}:
+
+            production_copy = self.productionsOriginal.copy()
+
+            for production in production_copy:
+
+                name_prod = production[0]
+                prod = production[1].split(" ")
+
+                for token in self.tokens:
+                    if prod[0] == token[0]:
+                        if self.first == {}:
+                            self.first[name_prod] = [prod[0]]
+                        else:
+                            if name_prod in self.first.keys():
+                                elements = self.first[name_prod]
+                                if prod[0] not in elements:
+                                    self.first[name_prod].append(prod[0])
+                            else:
+                                self.first[name_prod] = [prod[0]]
+                            
+
+                same_prod = Set()
+                same_prod.AddItem(name_prod)
+                same_prod.AddItem(prod[0])
+
+                for prod2 in production_copy:
+                    if prod2[0] == same_prod.returnLastItem():
+                        result = prod2[1].split(" ")[0]
+
+                        reached = False
+                        for token in self.tokens:
+                            if result == token[0]:
+
+                                for item in same_prod.Elementos:
+
+                                    if self.first == {}:
+                                        self.first[item] = [result]
+                                    else:
+                                        if item in self.first.keys():
+                                            elements = self.first[item]
+                                            if result not in elements:
+                                                self.first[item].append(result)
+                                        else:
+                                            self.first[item] = [result]
+                                            
+                                        
+                                    reached = True
+
+                        if reached == False:
+                            same_prod.AddItem(result)
+            
+            for token in self.tokens:
+                if token[0] == 'ε':
+                    continue
+                self.first[token[0]] = [token[0]]
+
+            #print(self.first)
+
+            # PrettyTable self.first
+            table = PrettyTable()
+            table.field_names = ["Elemento", "First"]
+            for key in self.first.keys():
+                table.add_row([key, self.first[key]])
+            
+            print(table)
+
+
+        if value != None:
+            for token in self.tokens:
+                if value == token[0]:
+                    return [value]
+            
+            if value in self.first.keys():
+                return self.first[value]
+
+    def follow_calc(self):
+        self.follow[self.inicial_token] = ["$"]
+
+        non_terminals = []
+        for production in self.productionsOriginal:
+            non_terminals.append(production[0])
+
+        for production in self.productionsOriginal:
+
+            prod_original = production[0]
+            prod = production[1].split(" ")
+
+            for i in range(len(prod)):
+
+                # check if there is a non-terminal surrounded by non-terminals on both sides
+                if i+1 < len(prod) and prod[i] in non_terminals:
+
+                    firstB = self.first_calc(prod[i+1])
+                    for item in firstB:
+                        if item == 'ε':
+                            # delete epsilon
+                            firstB.remove(item)
+
+                    if prod[i] in self.follow.keys():
+                        for item in firstB:
+                            if item not in self.follow[prod[i]]:
+                                self.follow[prod[i]].append(item)
+                    else:
+                        self.follow[prod[i]] = firstB
+
+
+        for production in self.productionsOriginal:
+
+            prod_original = production[0]
+            prod = production[1].split(" ")
+
+            for i in range(len(prod)):
+
+                # check if there is a non-terminal surrounded by
+                if i+1 < len(prod) and prod[i] in non_terminals:
+                    
+                    firstB = self.first_calc(prod[i+1])
+                    epsilon_check = False
+                    for item in firstB:
+                        if item == 'ε':
+                            epsilon_check = True
+
+                    if epsilon_check == True:
+
+                        if prod[i] in self.follow.keys() and prod_original in self.follow.keys():
+                            for item in self.follow[prod_original]:
+                                if item not in self.follow[prod[i]]:
+                                    self.follow[prod[i]].append(item)
+                        elif prod[i] not in self.follow.keys() and prod_original in self.follow.keys():
+                            self.follow[prod[i]] = self.follow[prod_original]
+
+                        else:
+                            self.follow[prod[i]] = []
+
+                elif i+1 >= len(prod) and prod[i] in non_terminals:
+                    if prod[i] in self.follow.keys() and prod_original in self.follow.keys():
+                        for item in self.follow[prod_original]:
+                            if item not in self.follow[prod[i]]:
+                                self.follow[prod[i]].append(item)
+                    elif prod[i] not in self.follow.keys() and prod_original in self.follow.keys():
+                        self.follow[prod[i]] = self.follow[prod_original]
+
+                    else:
+                        self.follow[prod[i]] = []
+
+        #print(self.follow)
+
+        # prettyTable self.follow
+        table = PrettyTable()
+        table.field_names = ["Elemento", "Follow"]
+        for key in self.follow.keys():
+            table.add_row([key, self.follow[key]])
+
+        print(table)
+
     def automaton(self):
         dot = Digraph()
         dot.attr(rankdir="LR")
@@ -484,4 +652,4 @@ class YalPParser(Automata):
 
 
 
-YalParser = YalPParser("./yalex/slr-1.yalp", "./yalex/slr-1.yal")
+YalParser = YalPParser("./yalex/slr-4.yalp", "./yalex/slr-4.yal")

@@ -1,0 +1,98 @@
+/* Configuración del parser para Gramática No.4 */
+/* Sigue la gramática SLR: */
+/* P -> T */
+/* T -> M Q */
+/* T -> M */
+/* Q -> ; M Q */
+/* Q -> ; M */
+/* M -> A */
+/* A -> id assignop E */
+/* E -> X Z */
+/* E -> X */
+/* Z -> < X */
+/* Z -> eq X */
+/* X -> R W */
+/* X -> R */
+/* W -> Y W */
+/* W -> Y */
+/* Y -> + R */
+/* Y -> - R */
+/* R -> F V */
+/* R -> F */
+/* V -> J V */
+/* V -> J */
+/* J -> * F */
+/* J -> / F */
+/* F -> (E) */
+/* F -> number */
+/* F -> id */
+
+%token ID
+%token NUMBER
+%token LPAREN
+%token RPAREN
+%token SEMICOLON
+%token ASSIGNOP
+%token LT
+%token EQ
+%token MINUS
+%token DIV
+%token PLUS
+%token TIMES
+
+%%
+
+p:
+    t
+;
+t:
+    m q
+  | m
+;
+q:
+    SEMICOLON m q
+  | SEMICOLON m
+;
+m:
+    a
+;
+a:
+    ID ASSIGNOP e
+;
+e:
+    x z
+  | x
+;
+z:
+    LT x
+  | EQ x
+;
+x:
+    r w
+  | r
+;
+w:
+    y w
+  | y
+;
+y:
+    PLUS r
+  | MINUS r
+;
+r:
+    f v
+  | f
+;
+v:
+    j v
+  | j
+;
+j:
+    TIMES f
+  | DIV f
+;
+f:
+    LPAREN e RPAREN
+  | NUMBER
+  | ID
+;
