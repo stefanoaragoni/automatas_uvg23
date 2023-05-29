@@ -23,10 +23,10 @@ def parser():
 	print('-------- Tabla SLR(1) --------')
 	print('')
 	print(yalp.table)
-	print('')
 
-	m = 4     								# Cantidad de columnas
-	n = 4                                   # Cantidad de tokens
+	print('')
+	m = 4
+	n = 4
 
 	columns = ['STACK', 'SYMBOL', 'INPUT', 'ACTION']
 
@@ -55,27 +55,22 @@ def parser():
 	while(True):
 		s = stack[-1]
 
-		if ("S" in yalp.table[a][s]):
-			t = int(yalp.table[a][s].replace("S",""))
-			
+		if ('S' in yalp.table[a][s]):
+			t = int(yalp.table[a][s].replace('S',''))
 			new_row = {'STACK': stack.copy(), 'SYMBOL': symbol.copy(), 'INPUT': input, 'ACTION': 'SHIFT'}
 			df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-			
-			symbol.append(a)
 			stack.append(t)
+			symbol.append(a)
 			input = input[1:]
 			a = input[0]
-		
-		elif ("R" in yalp.table[a][s]):
-			t = int(yalp.table[a][s].replace("R",""))
 
+		elif ('R' in yalp.table[a][s]):
+			t = int(yalp.table[a][s].replace('R',''))
 			prod = yalp.productionsOriginal[t-1]
 			A = prod[0]
-			B = prod[1].split(" ")
-
-			new_row = {'STACK': stack.copy(), 'SYMBOL': symbol.copy(), 'INPUT': input, 'ACTION': 'REDUCE BY'+str(prod)}
+			B = prod[1].split(' ')
+			new_row = {'STACK': stack.copy(), 'SYMBOL': symbol.copy(), 'INPUT': input, 'ACTION': 'REDUCE'}
 			df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-
 			for i in range(len(B)):
 				if len(stack) > 0:
 					stack.pop()
@@ -83,24 +78,20 @@ def parser():
 					symbol.pop()
 
 			t_temp = stack[-1]
-
 			symbol.append(A)
-
 			goto = yalp.table[A][t_temp]
-			goto = int(goto.replace("S",""))
+			goto = int(goto.replace('S',''))
 			stack.append(goto)
 
-		elif ("ACCEPT" in yalp.table[a][s]):
-			new_row = {'STACK': stack.copy(), 'SYMBOL': symbol.copy(), 'INPUT': ['$'], 'ACTION': 'ACCEPT'}
+		elif ('ACCEPT' in yalp.table[a][s]):
+			new_row = {'STACK': stack.copy(), 'SYMBOL': symbol.copy(), 'INPUT': input, 'ACTION': 'ACCEPT'}
 			df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
 			break
 
 		else:
-			# Error
 			print('')
 			print('-------- ERROR --------')
 			print('')
-
 			if len(symbol) > 0:
 				print('Error Sintáctico: No se esperaba el token ', a,'después de ', symbol[-1])
 			else:
@@ -109,9 +100,8 @@ def parser():
 			exit()
 
 	print('')
-	print('-------- Tabla Simulación --------')
+	print('-------- Tabla de Parsing --------')
 	print('')
 	print(df)
-
 
 parser()
