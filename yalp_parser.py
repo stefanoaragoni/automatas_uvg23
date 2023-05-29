@@ -1,3 +1,4 @@
+import pickle
 from simbolo import Simbolo
 from transicion import Transicion
 from automata import Automata
@@ -8,9 +9,10 @@ import numpy as np
 import importlib
 from yal_parser import YalParser
 from set import Set
+import pandas as pd
 
 class YalPParser(Automata):
-    def __init__(self, fileYalpar, fileYalex):
+    def __init__(self, fileYalpar, tokens):
 
         # Inicializa la clase padre (Automata)
         super().__init__()
@@ -19,8 +21,9 @@ class YalPParser(Automata):
 
         self.file = fileYalpar
         
-        yal = YalParser(fileYalex)
-        self.YalexTokens = yal.tokens
+        self.YalexTokens = tokens
+        # yal = YalParser(fileYalex)
+        # self.YalexTokens = yal.tokens
 
         # Contiene los caracteres que se pueden usar en la expresión regular
         self.charset = ["[", "]", "-"]
@@ -40,6 +43,8 @@ class YalPParser(Automata):
         self.follow_calc()
 
         self.automaton()
+
+        self.table_slr1()
 
         print("\n-----\n")
 
@@ -506,7 +511,7 @@ class YalPParser(Automata):
             
             for token in self.tokens:
                 if token[0] == 'ε':
-                    continue
+                    token[1] = 1
                 self.first[token[0]] = [token[0]]
 
             #print(self.first)
@@ -533,7 +538,10 @@ class YalPParser(Automata):
 
         non_terminals = []
         for production in self.productionsOriginal:
-            non_terminals.append(production[0])
+            if production[0] not in non_terminals:
+                non_terminals.append(production[0])
+
+        self.non_terminals = non_terminals
 
         for production in self.productionsOriginal:
 
@@ -650,6 +658,226 @@ class YalPParser(Automata):
         dot.node_attr.update({'shape': 'box'})
         dot.render(view=True, format='pdf')
 
+    def table_slr1(self):
+        m = len(self.Estados.Elementos) - 1     # Cantidad de estados (-1 de aceptación)
+        n = 0                                   # Cantidad de tokens
+
+        not_ignored_tokens = []
+        for token in self.tokens:
+            if token[1] != 1:
+                n = n+1
+                not_ignored_tokens.append(token[0])
+
+        not_ignored_tokens.append("$")
+        n = n + 1
+
+        for nonTerminal in self.non_terminals:
+            n = n+1
+            not_ignored_tokens.append(nonTerminal)
+    
+
+        # array nxm
+        data = [[''] * n for _ in range(m)]
+        df = pd.DataFrame(data, columns=not_ignored_tokens)
 
 
-YalParser = YalPParser("./yalex/slr-4.yalp", "./yalex/slr-4.yal")
+        # Agregar Sx -> Shift
+        for transition in self.transiciones:
+
+            name = transition.el_simbolo
+            origin = transition.estado_origen
+            destination = transition.estado_destino
+
+            if destination == 'Aceptar':
+                df.loc[origin,name] = 'ACCEPT'
+
+            elif name in self.non_terminals:
+                df.loc[origin,name] = str(destination)
+
+            else:
+                df.loc[origin,name] = 'S'+str(destination)
+
+        # Agregar Rx -> Reduce
+        for estado in self.Estados.Elementos:
+            combinacion = estado.items_pre + estado.items_post
+            self.productionsOriginal
+            self.follow
+
+            for item in combinacion:
+                if item[1][-1] ==  '•':
+
+                    if item[0] in self.follow.keys():
+                        for follow in self.follow[item[0]]:
+
+                            if df.loc[estado.id,follow] == '':
+                                df.loc[estado.id,follow] = 'R'+str(self.productionsOriginal.index([item[0], item[1][:-1].strip()])+1)
+
+                            else:
+                                # Conflict
+                                ubicacion_conflicto = "R"+str(self.productionsOriginal.index([item[0], item[1][:-1].strip()])+1)
+                                print("\nError Semantico: Conflicto en [", estado.id, ",", follow, "] = (", df.loc[estado.id,follow], ",", ubicacion_conflicto,")")
+
+                                # Exit program
+                                exit()
+
+        print("\n-------- Tabla SLR(1) --------\n")
+        print(df.head(20))
+
+        self.table = df
+
+
+    def generate_parser(self):
+        serialized_object = pickle.dumps(self)
+
+        name = self.file.replace("./yalex/","").replace(".yalp","")+"_parser"
+        # Save the serialized object to a file
+        with open(f"./scanner/{name}.pkl", "wb") as file:
+            file.write(serialized_object)
+
+        with open(f"{name}.py", "w") as archivo:
+            archivo.write("import pickle\n")
+            archivo.write("import pandas as pd\n")
+            archivo.write("import numpy as np\n")
+            archivo.write("from simulacion import Simulacion\n")
+            archivo.write("from prettytable import PrettyTable\n")
+            archivo.write("from afd_directo import AFD_Directo\n")
+            archivo.write("from yal_parser import YalParser\n\n")
+
+            #LR-parsing algorithm
+        
+            archivo.write("def parser():\n")
+            archivo.write("\twith open('./scanner/"+name+".pkl', 'rb') as file:\n")
+            archivo.write("\t\tserialized_object = file.read()\n\n")
+            archivo.write("\tyalp = pickle.loads(serialized_object)\n\n")
+
+            archivo.write("\tnamespace = {} \n")
+            archivo.write("\tfilename = '"+self.file.replace("./yalex/","").replace(".yalp","")+".py' \n")
+            archivo.write("\twith open(filename, 'r') as file: \n")
+            archivo.write("\t\tcode = file.read() \n")
+            archivo.write("\texec(code, namespace) \n")
+            archivo.write("\tresult = namespace['result']\n\n")
+
+            archivo.write("\tprint('')\n")
+            archivo.write("\tprint('-------- Tabla SLR(1) --------')\n")
+            archivo.write("\tprint('')\n")
+            archivo.write("\tprint(yalp.table)\n\n")
+            archivo.write("\tprint('')\n")
+
+            # m = 4     								# Cantidad de columnas
+            # n = 4                                   # Cantidad de tokens
+
+            # columns = ['STACK', 'SYMBOL', 'INPUT', 'ACTION']
+
+            # # array nxm
+            # data = [[''] * n for _ in range(1)]
+            # df = pd.DataFrame(data, columns=columns)
+
+            archivo.write("\tm = 4\n")
+            archivo.write("\tn = 4\n\n")
+
+            archivo.write("\tcolumns = ['STACK', 'SYMBOL', 'INPUT', 'ACTION']\n\n")
+
+            archivo.write("\t# array nxm\n")
+            archivo.write("\tdata = [[''] * n for _ in range(1)]\n")
+            archivo.write("\tdf = pd.DataFrame(data, columns=columns)\n\n")
+
+            archivo.write("\tinput = []\n")
+            archivo.write("\tfor token in result:\n")
+            archivo.write("\t\tfor key in yalp.tokens:\n")
+            archivo.write("\t\t\tif token[2] == key[0]:\n")
+            archivo.write("\t\t\t\tif key[1] == 1:\n")
+            archivo.write("\t\t\t\t\tpass\n")
+            archivo.write("\t\t\t\telse:\n")
+            archivo.write("\t\t\t\t\tinput.append(token[2])\n")
+            archivo.write("\t\t\t\t\tbreak\n\n")
+
+            archivo.write("\tinput.append('$')\n\n")
+
+            archivo.write("\t# Inicializar Parsing\n")
+            archivo.write("\tstack = [0]\n")
+            archivo.write("\tinput = input\n")
+            archivo.write("\tsymbol = []\n")
+            archivo.write("\ta = input[0]\n\n")
+
+            archivo.write("\twhile(True):\n")
+            archivo.write("\t\ts = stack[-1]\n\n")
+
+            archivo.write("\t\tif ('S' in yalp.table[a][s]):\n")
+            archivo.write("\t\t\tt = int(yalp.table[a][s].replace('S',''))\n")
+
+            archivo.write("\t\t\tnew_row = {'STACK': stack.copy(), 'SYMBOL': symbol.copy(), 'INPUT': input, 'ACTION': 'SHIFT'}\n")
+            archivo.write("\t\t\tdf = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)\n")
+
+            archivo.write("\t\t\tstack.append(t)\n")
+            archivo.write("\t\t\tsymbol.append(a)\n")
+            archivo.write("\t\t\tinput = input[1:]\n")
+            archivo.write("\t\t\ta = input[0]\n\n")
+
+            archivo.write("\t\telif ('R' in yalp.table[a][s]):\n")
+            archivo.write("\t\t\tt = int(yalp.table[a][s].replace('R',''))\n")
+            archivo.write("\t\t\tprod = yalp.productionsOriginal[t-1]\n")
+
+            archivo.write("\t\t\tA = prod[0]\n")
+            archivo.write("\t\t\tB = prod[1].split(' ')\n")
+
+            archivo.write("\t\t\tnew_row = {'STACK': stack.copy(), 'SYMBOL': symbol.copy(), 'INPUT': input, 'ACTION': 'REDUCE'}\n")
+            archivo.write("\t\t\tdf = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)\n")
+
+            archivo.write("\t\t\tfor i in range(len(B)):\n")
+            archivo.write("\t\t\t\tif len(stack) > 0:\n")
+            archivo.write("\t\t\t\t\tstack.pop()\n")
+            archivo.write("\t\t\t\tif len(symbol) > 0:\n")
+            archivo.write("\t\t\t\t\tsymbol.pop()\n\n")
+
+            archivo.write("\t\t\tt_temp = stack[-1]\n")
+
+            archivo.write("\t\t\tsymbol.append(A)\n")
+
+            # goto = yalp.table[A][t_temp]
+			# goto = int(goto.replace("S",""))
+			# stack.append(goto)
+
+            archivo.write("\t\t\tgoto = yalp.table[A][t_temp]\n")
+            archivo.write("\t\t\tgoto = int(goto.replace('S',''))\n")
+            archivo.write("\t\t\tstack.append(goto)\n\n")
+
+            archivo.write("\t\telif ('ACCEPT' in yalp.table[a][s]):\n")
+            archivo.write("\t\t\tnew_row = {'STACK': stack.copy(), 'SYMBOL': symbol.copy(), 'INPUT': input, 'ACTION': 'ACCEPT'}\n")
+            archivo.write("\t\t\tdf = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)\n")
+            archivo.write("\t\t\tbreak\n\n")
+
+            archivo.write("\t\telse:\n")
+            archivo.write("\t\t\tprint('')\n")
+            archivo.write("\t\t\tprint('-------- ERROR --------')\n")
+            archivo.write("\t\t\tprint('')\n")
+
+            # if len(symbol) > 0:
+			# 	print('Error Sintáctico: No se esperaba el token ', a,'después de ', symbol[-1])
+			# else:
+			# 	print('Error Sintáctico: No se esperaba el token ', a, 'en la posición 0')
+			# print('')
+			# exit()
+
+            archivo.write("\t\t\tif len(symbol) > 0:\n")
+            archivo.write("\t\t\t\tprint('Error Sintáctico: No se esperaba el token ', a,'después de ', symbol[-1])\n")
+            archivo.write("\t\t\telse:\n")
+            archivo.write("\t\t\t\tprint('Error Sintáctico: No se esperaba el token ', a, 'en la posición 0')\n")   
+            archivo.write("\t\t\tprint('')\n")
+            archivo.write("\t\t\texit()\n\n")
+
+            archivo.write("\tprint('')\n")
+            archivo.write("\tprint('-------- Tabla de Parsing --------')\n")
+            archivo.write("\tprint('')\n")
+            archivo.write("\tprint(df)\n\n")
+
+            archivo.write("parser()")
+
+
+
+
+        
+
+        
+
+
+

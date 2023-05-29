@@ -8,23 +8,23 @@ from afd_directo import AFD_Directo
 def tokens(regla, token):
 	if regla.replace("'", "").replace('"', "") == 'ws':
 		return "WHITESPACE"
-	if regla.replace("'", "").replace('"', "") == 'id':
-		return 'ID'
+	if regla.replace("'", "").replace('"', "") == 'number':
+		return "NUMBER"
 	if regla.replace("'", "").replace('"', "") == '+':
-		return 'PLUS'
+		return "PLUS"
 	if regla.replace("'", "").replace('"', "") == '*':
-		return 'TIMES'
+		return "TIMES"
 	if regla.replace("'", "").replace('"', "") == '(':
-		return 'LPAREN'
+		return "LPAREN"
 	if regla.replace("'", "").replace('"', "") == ')':
-		return 'RPAREN'
+		return "RPAREN"
 	else:
 		return 'Error: Token no definido!'
 
 
 #-------- SIMULACION
 def simulacion():
-	with open(f'./scanner/slr-1.pkl', 'rb') as file:
+	with open(f'./scanner/slr-3.pkl', 'rb') as file:
 		serialized_object = file.read()
 
 	automata = pickle.loads(serialized_object)

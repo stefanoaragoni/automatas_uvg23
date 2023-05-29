@@ -77,7 +77,10 @@ class scannerGenerator:
             archivo.write("\tautomata = pickle.loads(serialized_object)\n")
             archivo.write("\tresultado = None\n\n")
 
-            archivo.write("\twith open('./yalex/prueba.txt', 'r') as archivo:\n")
+            archivo.write("\t#-------- CONTENIDO\n")
+            archivo.write("\tinput_file = input('Ingrese el nombre del archivo a evaluar con la extension: ')\n")
+
+            archivo.write("\twith open('./yalex/'+input_file, 'r') as archivo:\n")
             archivo.write("\t\tcontenido = archivo.read()\n\n")
 
             archivo.write("\tresultado = Simulacion(automata, contenido, 'Yalex').resultado\n")
@@ -90,6 +93,7 @@ class scannerGenerator:
             archivo.write("\ttable.field_names = [\"TOKEN\", \"VALUE\",\"RESULT\"]\n")
             archivo.write("\tfor res in resultado:\n")
             archivo.write("\t\ttable.add_row([res[0], res[1], res[2]])\n")
+            archivo.write("\n")
             archivo.write("\tprint(table)\n")
 
             if self.trailer != []:
@@ -98,6 +102,8 @@ class scannerGenerator:
                 archivo.write("\t"+line+"\n")
 
             archivo.write("\n\treturn resultado\n")
+
+            archivo.write("\nresult = simulacion()\n")
 
 
 
