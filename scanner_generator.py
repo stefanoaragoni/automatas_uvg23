@@ -72,13 +72,13 @@ class scannerGenerator:
             file.write(serialized_object)
 
         with open(f"{self.nameOutput}.py", "a") as archivo:
-            archivo.write(f"\twith open('./scanner/{self.nameOutput}.pkl', 'rb') as file:\n")
+            archivo.write(f"\twith open(f'./scanner/{self.nameOutput}.pkl', 'rb') as file:\n")
             archivo.write("\t\tserialized_object = file.read()\n\n")
             archivo.write("\tautomata = pickle.loads(serialized_object)\n")
             archivo.write("\tresultado = None\n\n")
 
             archivo.write("\t#-------- CONTENIDO\n")
-            archivo.write("\tinput_file = input('\nIngrese el nombre del archivo a evaluar con la extension: ')\n")
+            archivo.write("\tinput_file = input('Ingrese el nombre del archivo a evaluar con la extension: ')\n")
 
             archivo.write("\twith open('./yalex/'+input_file, 'r') as archivo:\n")
             archivo.write("\t\tcontenido = archivo.read()\n\n")

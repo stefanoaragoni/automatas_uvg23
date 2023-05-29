@@ -723,24 +723,56 @@ class YalPParser(Automata):
         print("\n-------- Tabla SLR(1) --------\n")
         print(df.head(20))
 
+        self.table = df
+
 
     def generate_parser(self):
         serialized_object = pickle.dumps(self)
 
-        name = self.file.replace(".yalp","")
+        name = self.file.replace("./yalex/","").replace(".yalp","")+"_parser"
         # Save the serialized object to a file
         with open(f"./scanner/{name}.pkl", "wb") as file:
             file.write(serialized_object)
 
-        name = name+"_parser"
         with open(f"{name}.py", "w") as archivo:
             archivo.write("import pickle\n")
+            archivo.write("import pandas as pd\n")
+            archivo.write("import numpy as np\n")
             archivo.write("from simulacion import Simulacion\n")
             archivo.write("from prettytable import PrettyTable\n")
             archivo.write("from afd_directo import AFD_Directo\n")
             archivo.write("from yal_parser import YalParser\n\n")
 
+            #LR-parsing algorithm
+        
+            archivo.write("def parser():\n")
+            archivo.write("\twith open('./scanner/"+name+".pkl', 'rb') as file:\n")
+            archivo.write("\t\tserialized_object = file.read()\n\n")
+            archivo.write("\tyalp = pickle.loads(serialized_object)\n\n")
+
+            archivo.write("\tnamespace = {} \n")
+            archivo.write("\tfilename = '"+self.file.replace("./yalex/","").replace(".yalp","")+".py' \n")
+            archivo.write("\twith open(filename, 'r') as file: \n")
+            archivo.write("\t\tcode = file.read() \n")
+            archivo.write("\texec(code, namespace) \n")
+            archivo.write("\tresult = namespace['result']\n\n")
+
+            archivo.write("\tprint('')\n")
+            archivo.write("\tprint('-------- Tabla SLR(1) --------')\n")
+            archivo.write("\tprint('')\n")
+            archivo.write("\tprint(yalp.table)\n\n")
+            archivo.write("\tprint('')\n")
+
             
+
+
+
+            archivo.write("parser()")
+
+
+
+
+        
 
         
 
