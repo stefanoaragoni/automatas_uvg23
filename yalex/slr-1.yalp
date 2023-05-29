@@ -9,6 +9,9 @@
 %token TIMES
 %token LPAREN RPAREN
 
+%token WHITESPACE
+IGNORE WHITESPACE
+
 %%
 
 expression:

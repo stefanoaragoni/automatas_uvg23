@@ -6,7 +6,7 @@ let delim = [' ''\t''\n']
 let ws = delim+
 let digit = ["0123456789"]
 let digits = digit+
-let number = digits(.digits)?('E'['+''-']?digits)?
+let number = digits('.'digits)?('E'['+''-']?digits)?
 
 rule tokens = 
     ws        { return "WHITESPACE" }               (* Cambie por una acción válida, que devuelva el token *)

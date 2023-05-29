@@ -7,30 +7,33 @@ from afd_directo import AFD_Directo
 #-------- TOKENS
 def tokens(regla, token):
 	if regla.replace("'", "").replace('"', "") == 'ws':
-		return "WS"
+		return "WHITESPACE"
 	if regla.replace("'", "").replace('"', "") == 'id':
-		return "ID"
+		return 'ID'
 	if regla.replace("'", "").replace('"', "") == '+':
-		return "PLUS"
+		return 'PLUS'
 	if regla.replace("'", "").replace('"', "") == '*':
-		return "TIMES"
+		return 'TIMES'
 	if regla.replace("'", "").replace('"', "") == '(':
-		return "LPAREN"
+		return 'LPAREN'
 	if regla.replace("'", "").replace('"', "") == ')':
-		return "RPAREN"
+		return 'RPAREN'
 	else:
 		return 'Error: Token no definido!'
 
 
 #-------- SIMULACION
 def simulacion():
-	with open(f'./scanner/slr-1.pkl', 'rb') as file:
+	with open('./scanner/slr-1.pkl', 'rb') as file:
 		serialized_object = file.read()
 
 	automata = pickle.loads(serialized_object)
 	resultado = None
 
-	with open('./yalex/prueba.txt', 'r') as archivo:
+	#-------- CONTENIDO
+	input_file = input('
+Ingrese el nombre del archivo a evaluar con la extension: ')
+	with open('./yalex/'+input_file, 'r') as archivo:
 		contenido = archivo.read()
 
 	resultado = Simulacion(automata, contenido, 'Yalex').resultado
@@ -42,6 +45,9 @@ def simulacion():
 	table.field_names = ["TOKEN", "VALUE","RESULT"]
 	for res in resultado:
 		table.add_row([res[0], res[1], res[2]])
+
 	print(table)
 
 	return resultado
+
+result = simulacion()

@@ -1,3 +1,4 @@
+import pickle
 from simbolo import Simbolo
 from transicion import Transicion
 from automata import Automata
@@ -8,9 +9,10 @@ import numpy as np
 import importlib
 from yal_parser import YalParser
 from set import Set
+import pandas as pd
 
 class YalPParser(Automata):
-    def __init__(self, fileYalpar, fileYalex):
+    def __init__(self, fileYalpar, tokens):
 
         # Inicializa la clase padre (Automata)
         super().__init__()
@@ -19,8 +21,9 @@ class YalPParser(Automata):
 
         self.file = fileYalpar
         
-        yal = YalParser(fileYalex)
-        self.YalexTokens = yal.tokens
+        self.YalexTokens = tokens
+        # yal = YalParser(fileYalex)
+        # self.YalexTokens = yal.tokens
 
         # Contiene los caracteres que se pueden usar en la expresión regular
         self.charset = ["[", "]", "-"]
@@ -40,6 +43,8 @@ class YalPParser(Automata):
         self.follow_calc()
 
         self.automaton()
+
+        self.table_slr1()
 
         print("\n-----\n")
 
@@ -506,7 +511,7 @@ class YalPParser(Automata):
             
             for token in self.tokens:
                 if token[0] == 'ε':
-                    continue
+                    token[1] = 1
                 self.first[token[0]] = [token[0]]
 
             #print(self.first)
@@ -533,7 +538,10 @@ class YalPParser(Automata):
 
         non_terminals = []
         for production in self.productionsOriginal:
-            non_terminals.append(production[0])
+            if production[0] not in non_terminals:
+                non_terminals.append(production[0])
+
+        self.non_terminals = non_terminals
 
         for production in self.productionsOriginal:
 
@@ -650,6 +658,91 @@ class YalPParser(Automata):
         dot.node_attr.update({'shape': 'box'})
         dot.render(view=True, format='pdf')
 
+    def table_slr1(self):
+        m = len(self.Estados.Elementos) - 1     # Cantidad de estados (-1 de aceptación)
+        n = 0                                   # Cantidad de tokens
+
+        not_ignored_tokens = []
+        for token in self.tokens:
+            if token[1] != 1:
+                n = n+1
+                not_ignored_tokens.append(token[0])
+
+        not_ignored_tokens.append("$")
+        n = n + 1
+
+        for nonTerminal in self.non_terminals:
+            n = n+1
+            not_ignored_tokens.append(nonTerminal)
+    
+
+        # array nxm
+        data = [[''] * n for _ in range(m)]
+        df = pd.DataFrame(data, columns=not_ignored_tokens)
 
 
-YalParser = YalPParser("./yalex/slr-4.yalp", "./yalex/slr-4.yal")
+        # Agregar Sx -> Shift
+        for transition in self.transiciones:
+
+            name = transition.el_simbolo
+            origin = transition.estado_origen
+            destination = transition.estado_destino
+
+            if destination == 'Aceptar':
+                df.loc[origin,name] = 'ACCEPT'
+
+            elif name in self.non_terminals:
+                df.loc[origin,name] = str(destination)
+
+            else:
+                df.loc[origin,name] = 'S'+str(destination)
+
+        # Agregar Rx -> Reduce
+        for estado in self.Estados.Elementos:
+            combinacion = estado.items_pre + estado.items_post
+            self.productionsOriginal
+            self.follow
+
+            for item in combinacion:
+                if item[1][-1] ==  '•':
+
+                    if item[0] in self.follow.keys():
+                        for follow in self.follow[item[0]]:
+
+                            if df.loc[estado.id,follow] == '':
+                                df.loc[estado.id,follow] = 'R'+str(self.productionsOriginal.index([item[0], item[1][:-1].strip()])+1)
+
+                            else:
+                                # Conflict
+                                ubicacion_conflicto = "R"+str(self.productionsOriginal.index([item[0], item[1][:-1].strip()])+1)
+                                print("\nError Semantico: Conflicto en [", estado.id, ",", follow, "] = (", df.loc[estado.id,follow], ",", ubicacion_conflicto,")")
+
+                                # Exit program
+                                exit()
+
+        print("\n-------- Tabla SLR(1) --------\n")
+        print(df.head(20))
+
+
+    def generate_parser(self):
+        serialized_object = pickle.dumps(self)
+
+        name = self.file.replace(".yalp","")
+        # Save the serialized object to a file
+        with open(f"./scanner/{name}.pkl", "wb") as file:
+            file.write(serialized_object)
+
+        name = name+"_parser"
+        with open(f"{name}.py", "w") as archivo:
+            archivo.write("import pickle\n")
+            archivo.write("from simulacion import Simulacion\n")
+            archivo.write("from prettytable import PrettyTable\n")
+            archivo.write("from afd_directo import AFD_Directo\n")
+            archivo.write("from yal_parser import YalParser\n\n")
+
+            
+
+        
+
+
+

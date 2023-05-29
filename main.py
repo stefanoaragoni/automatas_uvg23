@@ -9,6 +9,7 @@ from arbol import Arbol
 from graph import Graph
 from scanner_generator import scannerGenerator
 from yal_parser import YalParser
+from yalp_parser import YalPParser
 from simulacion import Simulacion
 from prettytable import PrettyTable
 
@@ -17,7 +18,8 @@ def main():
     with open("./yalex/prueba.txt", "r") as archivo:
         contenido = archivo.read()
 
-    yal_file = ["slr-0.yal", "slr-1.yal", "slr-2.yal", "slr-3.yal", "slr-4.yal", "slr-5.yal"]
+    yal_file = ["slr-1.yal", "slr-3.yal", "lab-f.yal"]
+    yalp_file = ["slr-1.yalp", "slr-3.yalp", "lab-f.yalp"]
     opcion = 0
 
     while True:
@@ -50,15 +52,26 @@ def main():
 
                 afd_directo = AFD_Directo(tree)
                 Graph(afd_directo, postfix_expr.regex.replace("'",""), "AFD_Directo")
-
                 scannerGenerator(afd_directo, header, trailer, tokens, yal_file[opcion-1].replace(".yal",""))
 
-                # resultados = Simulacion(afd_directo, contenido, 'Yalex', header, trailer).resultado
-                # table = PrettyTable()
-                # table.field_names = ["TOKEN", "VALUE"]
-                # for resultado in resultados:
-                #     table.add_row([resultado[0], resultado[1]])
-                # print(table)
+                # namespace = {}
+                # filename = yal_file[opcion-1].replace(".yal",".py")
+                # with open(filename, 'r') as file:
+                #     code = file.read()
+
+                # exec(code, namespace)
+                # result = namespace['result']
+                # print(result)
+
+
+                # -------- Según las instrucciones:
+                # Este deberá tomar como entrada una gramática que defina a un lenguaje regular, 
+                # siguiendo la sintaxis correcta de un archivo en lenguaje YAPar. 
+
+                # Asimismo, tomará como entrada también los tokens de la previa ejecución de su 
+                # Generador de Analizadores Léxicos,YALex
+                yalp = YalPParser("./yalex/"+yalp_file[opcion-1], tokens)
+                yalp.generate_parser()
 
                 opcion = 0
                 input("\nPresione ENTER para continuar...")
