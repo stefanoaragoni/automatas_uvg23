@@ -14,10 +14,7 @@ from simulacion import Simulacion
 from prettytable import PrettyTable
 
 def main():
-
-    with open("./yalex/prueba.txt", "r") as archivo:
-        contenido = archivo.read()
-
+    
     yal_file = ["slr-1.yal", "slr-3.yal", "lab-f.yal"]
     yalp_file = ["slr-1.yalp", "slr-3.yalp", "lab-f.yalp"]
     opcion = 0
